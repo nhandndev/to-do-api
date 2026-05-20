@@ -1,42 +1,59 @@
 package com.nhan.to_do_api.entity;
 
+import com.nhan.to_do_api.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import javax.management.relation.Role;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 @Table(name = "users")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@NoArgsConstructor
-@Entity
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Size(min = 6 , message = "UserName need to have move than 6 digits ")
-    String userName;
-    String password;
-    @Email
-    String email;
-    Boolean enabled;
-    LocalDateTime creationDate;
-    LocalDateTime updateDate;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    Set<Role> roles;
-    @OneToMany
-    User user;
-    @OneToMany
-    Category category;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 4, max = 50, message = "Username must be between 4 and 50 characters")
+    @Column(name = "username", nullable = false, unique = true)
+    String username;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email is invalid")
+    @Column(name = "email", nullable = false, unique = true)
+    String email;
+
+    @NotBlank(message = "Password is required")
+    @Column(name = "password", nullable = false)
+    String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    Role role;
+
+    @Column(name = "enabled", nullable = false)
+    Boolean enabled;
+
+    @Column(name = "created_at")
+    LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Category> categories;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Todo> todos;
 }

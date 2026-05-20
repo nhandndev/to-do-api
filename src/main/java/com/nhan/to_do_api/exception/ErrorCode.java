@@ -29,7 +29,8 @@ public enum ErrorCode {
     INVALID_DUE_DATE(4012, "Invalid due date", HttpStatus.BAD_REQUEST),
     OLD_PASSWORD_INCORRECT(4013, "Old password is incorrect", HttpStatus.BAD_REQUEST),
 
-    INTERNAL_SERVER_ERROR(5000, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    INTERNAL_SERVER_ERROR(5000, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    TOKEN_CANNOT_CREATE(5001,"Toekn Cannot Create",HttpStatus.INTERNAL_SERVER_ERROR),;
      String message;
      int code;
      HttpStatus httpStatus;
