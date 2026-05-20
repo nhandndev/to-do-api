@@ -166,54 +166,80 @@ security
 
 ## 4.5. Implementation Phases (Roadmap)
 
-Dưới đây là lộ trình từng bước (Phase by Phase) chuẩn xác để bạn biết phải làm gì trước, làm gì sau khi phát triển API này:
+Dưới đây là lộ trình từng bước (Phase by Phase) chi tiết, mình đã gom luôn các **Requirements thiết yếu** vào ngay trong từng Phase để bạn đọc và code luôn mà không cần phải cuộn chuột tìm kiếm:
 
 ### Phase 1: Database & Entities (Nền tảng dữ liệu)
 - **Mục tiêu:** Thiết kế cơ sở dữ liệu và ánh xạ sang code Java.
-- **Công việc:**
-  1. Cấu hình kết nối MySQL trong `application.yml`.
-  2. Tạo các `Enum` (`Role`, `TodoStatus`, `Priority`).
-  3. Code các entity class trong thư mục `entity`: `User`, `Category`, `Todo`. Sử dụng các annotation của JPA (`@Entity`, `@Id`, `@OneToMany`,...).
-  4. Run app để Spring Boot Auto DDL tự động tạo bảng trong MySQL.
+- **Công việc & Yêu cầu:**
+  1. **Cấu hình database** trong `application.yml`: url `jdbc:mysql://localhost:3306/todo_app`, tài khoản `root`, tự động tạo bảng với `ddl-auto: update`.
+  2. **Tạo các Enums**:
+     - `Role`: `USER`, `ADMIN`
+     - `TodoStatus`: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`
+     - `Priority`: `LOW`, `MEDIUM`, `HIGH`
+  3. **Code Entity Classes**:
+     - **User Entity:** `id` (Long, PK), `username` (String, unique), `email` (String, unique), `password` (String), `role` (Role enum), `enabled` (Boolean), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
+     - **Category Entity:** `id` (Long, PK), `name` (String, unique per user), `color` (String), `user` (User, FK `user_id`), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
+     - **Todo Entity:** `id` (Long, PK), `title` (String), `description` (String), `status` (TodoStatus enum, default TODO), `priority` (Priority enum), `dueDate` (LocalDate), `completedAt` (LocalDateTime), `user` (User, FK `user_id`), `category` (Category, FK `category_id`), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
 
 ### Phase 2: Repositories & DTOs (Tầng truy xuất và truyền tải)
-- **Mục tiêu:** Tạo interface truy cập database và các object hứng/trả dữ liệu.
-- **Công việc:**
-  1. Tạo các interface trong `repository` (`UserRepository`, `TodoRepository`, `CategoryRepository`) kế thừa `JpaRepository`.
-  2. Code các DTO (`Request` và `Response`) ở thư mục `dto` theo như tài liệu API đã định nghĩa. (Ví dụ: `RegisterRequest`, `UserResponse`, `TodoCreationRequest`...).
-  3. Tạo class `ApiResponse<T>` chuẩn để bọc mọi response trả về cho Client.
+- **Mục tiêu:** Tạo interface truy cập DB và các object request/response API.
+- **Công việc & Yêu cầu:**
+  1. Tạo các class trong `repository` kế thừa `JpaRepository<Entity, Long>`.
+  2. **Tạo class bọc Response chuẩn:** `ApiResponse<T>` với 3 trường: `code` (int), `message` (String), `result` (T).
+  3. **Code các DTOs:**
+     - **Auth DTOs:** 
+       - `RegisterRequest`: `username` (String), `email` (String), `password` (String)
+       - `AuthenticationRequest`: `username` (String), `password` (String)
+       - `AuthenticationResponse`: `token` (String), `authenticated` (boolean)
+     - **Todo DTOs:** 
+       - `TodoCreationRequest`: `title` (String), `priority` (Priority enum), `dueDate` (LocalDate), `categoryId` (Long)
+       - `TodoUpdateRequest`: `title` (String), `description` (String), `status` (TodoStatus enum), `priority` (Priority enum), `dueDate` (LocalDate), `categoryId` (Long)
+       - `TodoStatusUpdateRequest`: `status` (TodoStatus enum)
+       - `TodoResponse`: `id` (Long), `title` (String), `description` (String), `status` (TodoStatus enum), `priority` (Priority enum), `dueDate` (LocalDate), `completedAt` (LocalDateTime), `category` (CategoryResponse)
+     - **Category DTOs:** 
+       - `CategoryCreationRequest`: `name` (String), `color` (String)
+       - `CategoryUpdateRequest`: `name` (String), `color` (String)
+       - `CategoryResponse`: `id` (Long), `name` (String), `color` (String)
+     - **User DTOs:** 
+       - `UserResponse`: `id` (Long), `username` (String), `email` (String), `role` (Role enum), `enabled` (boolean)
 
 ### Phase 3: Exception Handling & Services (Logic nghiệp vụ và Xử lý lỗi)
-- **Mục tiêu:** Xử lý các logic cốt lõi và bắt lỗi tập trung.
-- **Công việc:**
-  1. Định nghĩa `ErrorCode` (enum) chứa các mã lỗi (1000, 4004...).
-  2. Tạo `AppException` extends `RuntimeException` và `GlobalExceptionHandler` (dùng `@RestControllerAdvice`) trong thư mục `exception`.
-  3. Code logic CRUD trong `service` (`CategoryService`, `TodoService`) mà **CHƯA CẦN** dính đến Security (nghĩa là truyền chay User ID hoặc tạm fix cứng User).
+- **Mục tiêu:** Xử lý logic cốt lõi và bắt lỗi tập trung.
+- **Công việc & Yêu cầu:**
+  1. **Tạo `ErrorCode` Enum:** Khai báo mã lỗi ví dụ `SUCCESS(1000)`, `INVALID_REQUEST(4000)`, `USER_NOT_FOUND(4001)`, `UNAUTHORIZED(4005)`, `TODO_NOT_FOUND(4007)`, `CATEGORY_NOT_FOUND(4008)`, v.v.
+  2. **Bắt lỗi Global:** Tạo `AppException` và `GlobalExceptionHandler` trả về JSON `ApiResponse` theo ErrorCode.
+  3. **Validation (Jakarta):** Gắn annotation lên DTO (Ví dụ: `@NotBlank` cho title, `@Email` cho email, password `@Size(min=6)`).
+  4. **Code Service Logic (Chưa cần Security):**
+     - Status Todo đổi sang `DONE` -> tự động set `completedAt = now()`. Đổi từ `DONE` sang trạng thái khác -> `completedAt = null`.
+     - Không cho xóa Category nếu Category đó vẫn đang chứa Todo.
+     - Các method service tạm thời nhận User ID dưới dạng tham số truyền vào để test.
 
 ### Phase 4: Controllers (Tạo API Endpoints)
-- **Mục tiêu:** Mở các endpoint API để test.
-- **Công việc:**
-  1. Tạo các controller (`CategoryController`, `TodoController`).
-  2. Map các HTTP methods (`@GetMapping`, `@PostMapping`...) gọi đến Service.
-  3. Test các API này bằng Postman hoặc Swagger để đảm bảo logic CRUD và Exception hoạt động đúng.
+- **Mục tiêu:** Mở các endpoint API để test qua Postman.
+- **Công việc & Yêu cầu:**
+  - `AuthController`: Mở `POST /auth/register`, `POST /auth/login`
+  - `UserController`: Mở `GET /users/me`, `PATCH /users/me/password`
+  - `TodoController`: Mở `POST /todos`, `GET /todos` (nhận param filter: status, priority, keyword, page, size), `GET /todos/{id}`, `PUT /todos/{id}`, `DELETE /todos/{id}`, `PATCH /todos/{id}/status`
+  - `CategoryController`: Mở `POST /categories`, `GET /categories`, `GET /categories/{id}`, `PUT /categories/{id}`, `DELETE /categories/{id}`
 
 ### Phase 5: Spring Security & JWT (Bảo mật)
-- **Mục tiêu:** Khóa các API lại và yêu cầu đăng nhập.
-- **Công việc:**
-  1. Thêm cấu hình Security `SecurityConfig`, mã hóa mật khẩu `PasswordEncoder`.
-  2. Code `JwtTokenProvider` (tạo và parse token) và `JwtAuthenticationFilter` (chặn request để kiểm tra token).
-  3. Hoàn thiện `AuthenticationService` và `AuthController` (API Register, Login).
-  4. Cập nhật lại `TodoService` và `CategoryService` để lấy User ID thực tế từ Security Context (`SecurityContextHolder`).
+- **Mục tiêu:** Khóa API, yêu cầu đăng nhập và phân quyền bằng JWT.
+- **Công việc & Yêu cầu:**
+  1. **Config Security:** Thêm `SecurityConfig`, dùng `BCryptPasswordEncoder` để mã hóa mật khẩu trước khi lưu.
+  2. **Bảo vệ URL:** Public URL `/auth/**`, `/swagger-ui/**`. Khóa tất cả các API còn lại.
+  3. **JWT Token:** Viết `JwtTokenProvider` tạo token lưu subject là `username`, chứa claim `role`, hết hạn sau 1 giờ.
+  4. **Filter:** Viết `JwtAuthenticationFilter` đọc header `Authorization: Bearer <token>`, parse ra user và lưu vào `SecurityContextHolder`.
+  5. **Cập nhật Service:** Xóa tham số User ID tĩnh truyền vào Service. Thay vào đó lấy ID của user thật đang đăng nhập từ `SecurityContextHolder`, đảm bảo chỉ được xem/sửa Todo/Category của chính mình.
 
 ### Phase 6: Refactoring & Testing (Hoàn thiện)
-- **Mục tiêu:** Code sạch hơn và viết test.
-- **Công việc:**
-  1. Sử dụng MapStruct (hoặc tự viết Mapper) trong thư mục `mapper` để chuyển đổi Entity <-> DTO.
-  2. Viết Unit Test cho Service.
-  3. Viết Integration Test cho Controller.
-  4. Dockerize ứng dụng (viết `Dockerfile`, `docker-compose.yml`).
+- **Mục tiêu:** Làm sạch code và đưa app lên Docker.
+- **Công việc & Yêu cầu:**
+  1. Tích hợp thư viện `MapStruct` để tự động map Entity <-> DTO.
+  2. Viết Unit Test cho Service sử dụng `Mockito`.
+  3. Tạo `Dockerfile` để build app thành Image.
+  4. Viết `docker-compose.yml` để chạy cả App và MySQL Database bằng 1 dòng lệnh.
 
----
+
 
 ## 5. Core Features
 

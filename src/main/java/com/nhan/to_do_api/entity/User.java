@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Set;
 
 @Data
+@Table(name = "users")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,7 +35,7 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     Set<Role> roles;
     @OneToMany
-    Todo todos;
+    User user;
     @OneToMany
     Category category;
 
