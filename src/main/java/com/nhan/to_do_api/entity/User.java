@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import javax.management.relation.Role;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Set;
 
@@ -17,19 +18,24 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    String id;
+    Long id;
     @Size(min = 6 , message = "UserName need to have move than 6 digits ")
     String userName;
     String password;
     @Email
     String email;
-    String lastName;
-    String firstName;
-    Date dob;
+    Boolean enabled;
+    LocalDateTime creationDate;
+    LocalDateTime updateDate;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     Set<Role> roles;
+    @OneToMany
+    Todo todos;
+    @OneToMany
+    Category category;
 
 }

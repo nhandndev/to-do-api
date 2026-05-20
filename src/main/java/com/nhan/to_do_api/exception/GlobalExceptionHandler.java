@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<ApiResponse> handleException(AppException appException) {
-
     }
 
 }

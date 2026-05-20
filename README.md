@@ -164,6 +164,57 @@ security
 
 ---
 
+## 4.5. Implementation Phases (Roadmap)
+
+Dưới đây là lộ trình từng bước (Phase by Phase) chuẩn xác để bạn biết phải làm gì trước, làm gì sau khi phát triển API này:
+
+### Phase 1: Database & Entities (Nền tảng dữ liệu)
+- **Mục tiêu:** Thiết kế cơ sở dữ liệu và ánh xạ sang code Java.
+- **Công việc:**
+  1. Cấu hình kết nối MySQL trong `application.yml`.
+  2. Tạo các `Enum` (`Role`, `TodoStatus`, `Priority`).
+  3. Code các entity class trong thư mục `entity`: `User`, `Category`, `Todo`. Sử dụng các annotation của JPA (`@Entity`, `@Id`, `@OneToMany`,...).
+  4. Run app để Spring Boot Auto DDL tự động tạo bảng trong MySQL.
+
+### Phase 2: Repositories & DTOs (Tầng truy xuất và truyền tải)
+- **Mục tiêu:** Tạo interface truy cập database và các object hứng/trả dữ liệu.
+- **Công việc:**
+  1. Tạo các interface trong `repository` (`UserRepository`, `TodoRepository`, `CategoryRepository`) kế thừa `JpaRepository`.
+  2. Code các DTO (`Request` và `Response`) ở thư mục `dto` theo như tài liệu API đã định nghĩa. (Ví dụ: `RegisterRequest`, `UserResponse`, `TodoCreationRequest`...).
+  3. Tạo class `ApiResponse<T>` chuẩn để bọc mọi response trả về cho Client.
+
+### Phase 3: Exception Handling & Services (Logic nghiệp vụ và Xử lý lỗi)
+- **Mục tiêu:** Xử lý các logic cốt lõi và bắt lỗi tập trung.
+- **Công việc:**
+  1. Định nghĩa `ErrorCode` (enum) chứa các mã lỗi (1000, 4004...).
+  2. Tạo `AppException` extends `RuntimeException` và `GlobalExceptionHandler` (dùng `@RestControllerAdvice`) trong thư mục `exception`.
+  3. Code logic CRUD trong `service` (`CategoryService`, `TodoService`) mà **CHƯA CẦN** dính đến Security (nghĩa là truyền chay User ID hoặc tạm fix cứng User).
+
+### Phase 4: Controllers (Tạo API Endpoints)
+- **Mục tiêu:** Mở các endpoint API để test.
+- **Công việc:**
+  1. Tạo các controller (`CategoryController`, `TodoController`).
+  2. Map các HTTP methods (`@GetMapping`, `@PostMapping`...) gọi đến Service.
+  3. Test các API này bằng Postman hoặc Swagger để đảm bảo logic CRUD và Exception hoạt động đúng.
+
+### Phase 5: Spring Security & JWT (Bảo mật)
+- **Mục tiêu:** Khóa các API lại và yêu cầu đăng nhập.
+- **Công việc:**
+  1. Thêm cấu hình Security `SecurityConfig`, mã hóa mật khẩu `PasswordEncoder`.
+  2. Code `JwtTokenProvider` (tạo và parse token) và `JwtAuthenticationFilter` (chặn request để kiểm tra token).
+  3. Hoàn thiện `AuthenticationService` và `AuthController` (API Register, Login).
+  4. Cập nhật lại `TodoService` và `CategoryService` để lấy User ID thực tế từ Security Context (`SecurityContextHolder`).
+
+### Phase 6: Refactoring & Testing (Hoàn thiện)
+- **Mục tiêu:** Code sạch hơn và viết test.
+- **Công việc:**
+  1. Sử dụng MapStruct (hoặc tự viết Mapper) trong thư mục `mapper` để chuyển đổi Entity <-> DTO.
+  2. Viết Unit Test cho Service.
+  3. Viết Integration Test cho Controller.
+  4. Dockerize ứng dụng (viết `Dockerfile`, `docker-compose.yml`).
+
+---
+
 ## 5. Core Features
 
 ## 5.1 Authentication
@@ -441,7 +492,50 @@ Recommended rule:
 
 ---
 
-## 6. Entities
+## 6. Entities & Database UML
+
+Dưới đây là sơ đồ quan hệ thực thể (ERD) mô tả các bảng trong cơ sở dữ liệu:
+
+```mermaid
+erDiagram
+    USERS ||--o{ TODOS : "creates"
+    USERS ||--o{ CATEGORIES : "owns"
+    CATEGORIES ||--o{ TODOS : "contains"
+
+    USERS {
+        bigint id PK
+        varchar username
+        varchar email
+        varchar password
+        varchar role
+        boolean enabled
+        datetime created_at
+        datetime updated_at
+    }
+
+    CATEGORIES {
+        bigint id PK
+        varchar name
+        varchar color
+        bigint user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    TODOS {
+        bigint id PK
+        varchar title
+        text description
+        varchar status
+        varchar priority
+        date due_date
+        datetime completed_at
+        bigint user_id FK
+        bigint category_id FK
+        datetime created_at
+        datetime updated_at
+    }
+```
 
 ## 6.1 User Entity
 
