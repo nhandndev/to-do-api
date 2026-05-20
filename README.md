@@ -219,9 +219,9 @@ PATCH /users/me/password
 
 ### Business Rules
 
-- Username must be unique.
-- Email must be unique.
-- Password must be at least 6 characters.
+- ~~Username must be unique.
+- Email must be unique.~~
+- Password must be at ~~least 6 characters~~.
 - Password must be encoded before saving.
 - Login fails if username does not exist.
 - Login fails if password is wrong.
@@ -260,7 +260,7 @@ PATCH /users/{id}/status
 ```
 
 ### Business Rules
-
+[README.md](README.md)
 - Normal users can only view their own profile.
 - Admin can view all users.
 - Locked users cannot login.
