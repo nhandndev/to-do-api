@@ -62,7 +62,15 @@ public class GlobalExceptionHandler {
                .build();
        return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
    }
-   @ExceptionHander(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handle
+   @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(MethodArgumentNotValidException exception) {
+       ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+       ApiResponse apiresponse = ApiResponse.builder()
+               .code(errorCode.getCode())
+               .message(errorCode.getMessage())
+               .result(null)
+               .build();
+       return ResponseEntity.status(errorCode.getCode()).body(apiresponse);
+   }
 
 }

@@ -1,6 +1,7 @@
 package com.nhan.to_do_api.service;
 
 import com.nhan.to_do_api.dto.request.TodoCreationRequest;
+import com.nhan.to_do_api.dto.request.TodoUpdateRequest;
 import com.nhan.to_do_api.dto.response.TodoResponse;
 import com.nhan.to_do_api.entity.Todo;
 import com.nhan.to_do_api.entity.User;
@@ -41,5 +42,11 @@ public class TodoService {
         String authentication = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(authentication).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return user;
+    }
+    public TodoResponse getToDo (String userName) {
+        User user = userRepository.findByUsername(userName).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Long id = user.getId();
+        Todo todo = todoRepository.findByUser(id).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+
     }
 }

@@ -9,10 +9,7 @@ import com.nhan.to_do_api.service.TodoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/todos")
@@ -25,6 +22,14 @@ public class TodoController {
                 .code(1000)
                 .message("Create Successfully")
                 .result(todoService.createToDo(todoCreationRequest))
+                .build();
+    }
+    @GetMapping
+    public ApiResponse<TodoResponse> getToDo (@RequestParam @Valid String userName){
+        return ApiResponse.<TodoResponse>builder()
+                .code(1000)
+                .message("Get Successfully")
+                .result(todoService.getToDo(userName))
                 .build();
     }
 }
