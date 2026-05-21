@@ -1444,3 +1444,147 @@ todo-app-api
 │                           ├── AuthControllerTest.java
 │                           ├── TodoControllerTest.java
 │                           └── CategoryControllerTest.java
+
+---
+
+## 16. API Contract (Dành riêng cho Frontend)
+
+Phần này cung cấp chính xác các mẫu JSON (Payload) để team Frontend có thể dựa vào và làm việc độc lập. 
+Tất cả các API đều được bọc trong một chuẩn `ApiResponse` thống nhất.
+
+### 16.1. Đăng ký (Register)
+- **Endpoint:** `POST /api/auth/register` (hoặc `/auth/register`)
+- **Headers:** None
+- **Request Body:**
+```json
+{
+  "username": "nhan",
+  "email": "nhan@example.com",
+  "password": "password123"
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "code": 1000,
+  "message": "Register successfully!",
+  "result": {
+    "id": 1,
+    "username": "nhan",
+    "email": "nhan@example.com",
+    "role": "USER",
+    "enabled": true,
+    "createdAt": "2026-05-20T10:00:00",
+    "updatedAt": "2026-05-20T10:00:00"
+  }
+}
+```
+
+### 16.2. Đăng nhập (Login)
+- **Endpoint:** `POST /api/auth/login` (hoặc `/auth/login`)
+- **Headers:** None
+- **Request Body:**
+```json
+{
+  "username": "nhan",
+  "password": "password123"
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "code": 1000,
+  "message": "Login successfully!",
+  "result": {
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0Ijoib...",
+    "authenticated": true
+  }
+}
+```
+
+### 16.3. Tạo công việc mới (Create Todo)
+- **Endpoint:** `POST /api/todos` (hoặc `/todos`)
+- **Headers:** `Authorization: Bearer <token>`
+- **Request Body:**
+```json
+{
+  "title": "Học ReactJS",
+  "description": "Làm UI cho Todo App",
+  "priority": "HIGH",
+  "dueDate": "2026-06-01",
+  "categoryId": 1
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "code": 1000,
+  "message": "Create Successfully",
+  "result": {
+    "id": 1,
+    "title": "Học ReactJS",
+    "description": "Làm UI cho Todo App",
+    "status": "TODO",
+    "priority": "HIGH",
+    "dueDate": "2026-06-01",
+    "completedAt": null,
+    "createdAt": "2026-05-20T10:30:00",
+    "updatedAt": "2026-05-20T10:30:00",
+    "category": null
+  }
+}
+```
+
+### 16.4. Lấy danh sách việc của tôi (Get My Todos)
+- **Endpoint:** `GET /api/todos` (hoặc `/todos`)
+- **Headers:** `Authorization: Bearer <token>`
+- **Response (200 OK):**
+```json
+{
+  "code": 1000,
+  "message": "Get Successfully",
+  "result": [
+    {
+      "id": 1,
+      "title": "Học ReactJS",
+      "description": "Làm UI cho Todo App",
+      "status": "TODO",
+      "priority": "HIGH",
+      "dueDate": "2026-06-01",
+      "completedAt": null,
+      "createdAt": "2026-05-20T10:30:00",
+      "updatedAt": "2026-05-20T10:30:00",
+      "category": null
+    }
+  ]
+}
+```
+
+### 16.5. Đổi trạng thái việc (Update Status)
+- **Endpoint:** `PATCH /api/todos/{id}/status` (hoặc `/todos/{id}/status`)
+- **Headers:** `Authorization: Bearer <token>`
+- **Request Body:**
+```json
+{
+  "status": "DONE"
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "code": 1000,
+  "message": "Toggle Complete",
+  "result": {
+    "id": 1,
+    "title": "Học ReactJS",
+    "description": "Làm UI cho Todo App",
+    "status": "DONE",
+    "priority": "HIGH",
+    "dueDate": "2026-06-01",
+    "completedAt": "2026-05-20T11:00:00",
+    "createdAt": "2026-05-20T10:30:00",
+    "updatedAt": "2026-05-20T11:00:00",
+    "category": null
+  }
+}
+```
