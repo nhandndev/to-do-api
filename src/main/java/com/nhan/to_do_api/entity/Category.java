@@ -18,6 +18,6 @@ public class Category {
     LocalDateTime updatedAt;
     @ManyToOne
     User user;
-    @OneToMany
-    Todo todo;
+//    @OneToMany
+//    Todo todo;
 }

@@ -32,7 +32,7 @@ import java.util.UUID;
 
 @Service
 public class AuthenticationService {
-    @Value("${jwt.signerKey}")
+    @Value("${jwt.signer-key}")
     private String SIGN_KEY;
    @Autowired
    private UserRepository userRepository;

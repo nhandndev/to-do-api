@@ -29,7 +29,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {"/user", "/auth/token", "/login", "/auth/introspect",
             "/auth/logout", "/auth/refresh"};
     @NonFinal
-    @Value("${jwt.signerKey}")
+    @Value("${jwt.signer-kÍey}")
     protected String SIGNER_KEY;
 
      @Bean
