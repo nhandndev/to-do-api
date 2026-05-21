@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface TodoMapper {
-//    Todo toTodo(TodoCreationRequest todoCreationRequest , User user);
+   Todo toTodo(TodoCreationRequest todoCreationRequest);
     TodoResponse toToDoResponse(Todo todo);
     Todo toTodo(TodoUpdateRequest todoUpdateRequest);
 

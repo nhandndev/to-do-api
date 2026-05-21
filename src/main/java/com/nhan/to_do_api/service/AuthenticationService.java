@@ -57,10 +57,10 @@ public class AuthenticationService {
        return userMapper.toUserResponse(user);
    }
    public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {
-       var user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+       var user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD));
        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
        if(!authenticated) {
-           throw new AppException(ErrorCode.UNAUTHORIZED);
+           throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
        }
        String token = generateToken(user);
        return AuthenticationResponse.builder()
@@ -98,7 +98,7 @@ public class AuthenticationService {
 //                }
 //            });
 //        }
-
+//
 //        return stringJoiner.toString();
 //    }
     public SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
