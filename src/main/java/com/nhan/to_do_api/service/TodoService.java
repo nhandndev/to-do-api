@@ -1,6 +1,7 @@
 package com.nhan.to_do_api.service;
 
 import com.nhan.to_do_api.dto.request.TodoCreationRequest;
+import com.nhan.to_do_api.dto.request.TodoStatusUpdateRequest;
 import com.nhan.to_do_api.dto.request.TodoUpdateRequest;
 import com.nhan.to_do_api.dto.response.TodoResponse;
 import com.nhan.to_do_api.entity.Todo;
@@ -48,9 +49,28 @@ public class TodoService {
         User currentUser = getCurrentUser();
         return todoRepository.findAllByUser(currentUser).map(todo -> todoMapper.toToDoResponse(todo)).stream().toList();
     }
-    public TodoResponse getToDoById (Long id) {
+    public TodoResponse getToDo(Long id) {
         User currentUser = getCurrentUser();
         Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
         return todoMapper.toToDoResponse(todo);
+    }
+    public TodoResponse updateToDo(Long id, TodoUpdateRequest todoUpdateRequest) {
+        User currentUser = getCurrentUser();
+        Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+        todo.setUpdatedAt(LocalDateTime.now());
+        Todo todoUpdated = todoMapper.toTodo(todoUpdateRequest);
+        return todoMapper.toToDoResponse(todoRepository.save(todoUpdated));
+    }
+    public TodoResponse StatusUpdate(Long id, TodoStatusUpdateRequest todoStatusUpdateRequest) {
+        User currentUser = getCurrentUser();
+        Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+        todo.setUpdatedAt(LocalDateTime.now());
+        todo.setStatus(todoStatusUpdateRequest.getStatus());
+        return todoMapper.toToDoResponse(todo);
+    }
+    public void deleteToDo(Long id) {
+        User currentUser = getCurrentUser();
+        Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+        todoRepository.delete(todo);
     }
 }

@@ -1,14 +1,13 @@
 package com.nhan.to_do_api.controller;
 
 import com.nhan.to_do_api.dto.request.TodoCreationRequest;
+import com.nhan.to_do_api.dto.request.TodoStatusUpdateRequest;
+import com.nhan.to_do_api.dto.request.TodoUpdateRequest;
 import com.nhan.to_do_api.dto.response.ApiResponse;
 import com.nhan.to_do_api.dto.response.TodoResponse;
-import com.nhan.to_do_api.entity.Todo;
-import com.nhan.to_do_api.entity.User;
 import com.nhan.to_do_api.service.TodoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public class TodoController {
                 .build();
     }
     @GetMapping
-    public ApiResponse<List<TodoResponse>> getToDo (){
+    public ApiResponse<List<TodoResponse>> getMyToDo (){
         return ApiResponse.<List<TodoResponse>>builder()
                 .code(1000)
                 .message("Get Successfully")
@@ -35,11 +34,35 @@ public class TodoController {
                 .build();
     }
     @GetMapping("/{id}")
-    public ApiResponse<TodoResponse> getToDoById (@RequestParam @Valid Long id){
+    public ApiResponse<TodoResponse> getToDo (@RequestParam @Valid Long id){
         return ApiResponse.<TodoResponse>builder()
                 .code(1000)
                 .message("Get Successfully")
-                .result(todoService.getToDoById(id))
+                .result(todoService.getToDo(id))
+                .build();
+    }
+    @PutMapping("/{id}")
+    public ApiResponse<TodoResponse> updateToDo(@PathVariable @Valid Long id, @RequestBody @Valid TodoUpdateRequest todoUpdateRequest){
+        return ApiResponse.<TodoResponse>builder()
+                .code(1000)
+                .message("Update Successfully")
+                .result(todoService.updateToDo(id, todoUpdateRequest))
+                .build();
+    }
+    @PatchMapping("/{id}/status")
+    public ApiResponse<TodoResponse> StatusUpdate (@PathVariable @Valid Long id , @RequestBody @Valid TodoStatusUpdateRequest todoStatusUpdateRequest){
+        return ApiResponse.<TodoResponse>builder()
+                .code(1000)
+                .message("Toggle Complete")
+                .result(todoService.StatusUpdate(id,todoStatusUpdateRequest))
+                .build();
+    }
+    @DeleteMapping("/{id}")
+    public ApiResponse<TodoResponse> deleteToDo(@PathVariable @Valid Long id){
+        todoService.deleteToDo(id);
+        return ApiResponse.<TodoResponse>builder()
+                .code(1000)
+                .message("Delete Successfully")
                 .build();
     }
 }
