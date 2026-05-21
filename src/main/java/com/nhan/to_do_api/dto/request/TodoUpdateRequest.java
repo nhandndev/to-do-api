@@ -1,6 +1,5 @@
 package com.nhan.to_do_api.dto.request;
 
-import com.nhan.to_do_api.enums.Priority;
 import com.nhan.to_do_api.enums.TodoStatus;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

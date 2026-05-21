@@ -1,8 +1,5 @@
 package com.nhan.to_do_api.entity;
 
-import com.nhan.to_do_api.entity.Category;
-import com.nhan.to_do_api.entity.User;
-import com.nhan.to_do_api.enums.Priority;
 import com.nhan.to_do_api.enums.TodoStatus;
 import jakarta.persistence.*;
 import lombok.*;
