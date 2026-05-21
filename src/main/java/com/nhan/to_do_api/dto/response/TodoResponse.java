@@ -1,6 +1,7 @@
 package com.nhan.to_do_api.dto.response;
 
 import com.nhan.to_do_api.entity.Category;
+import com.nhan.to_do_api.entity.User;
 import com.nhan.to_do_api.enums.Priority;
 import com.nhan.to_do_api.enums.TodoStatus;
 import jakarta.persistence.GeneratedValue;
@@ -17,8 +18,6 @@ import java.util.Date;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TodoResponse {
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
    Long id;
    String title;
    String description;

@@ -52,6 +52,7 @@ public class AuthenticationService {
        user.setRole(Role.USER);
        user.setCreatedAt(LocalDateTime.now());
        user.setUpdatedAt(LocalDateTime.now());
+       user.setEnabled(true);
        user = userRepository.save(user);
        return userMapper.toUserResponse(user);
    }

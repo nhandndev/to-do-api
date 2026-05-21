@@ -1,4 +1,45 @@
 package com.nhan.to_do_api.service;
 
-public interface TodoService {
+import com.nhan.to_do_api.dto.request.TodoCreationRequest;
+import com.nhan.to_do_api.dto.response.TodoResponse;
+import com.nhan.to_do_api.entity.Todo;
+import com.nhan.to_do_api.entity.User;
+import com.nhan.to_do_api.enums.TodoStatus;
+import com.nhan.to_do_api.exception.AppException;
+import com.nhan.to_do_api.exception.ErrorCode;
+import com.nhan.to_do_api.mapper.TodoMapper;
+import com.nhan.to_do_api.repository.TodoRepository;
+import com.nhan.to_do_api.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+public class TodoService {
+    @Autowired
+    private TodoRepository todoRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private TodoMapper todoMapper;
+    public TodoResponse createToDo (TodoCreationRequest todoCreationRequest) {
+        User currentUser = getCurrentUser();
+        Todo todo = Todo.builder()
+                .title(todoCreationRequest.getTitle())
+                .description(todoCreationRequest.getDescription())
+                .status(TodoStatus.TODO)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .user(currentUser)
+                .build();
+        todo = todoRepository.save(todo);
+        return todoMapper.toToDoResponse(todo);
+    }
+    public  User getCurrentUser() {
+        String authentication = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(authentication).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return user;
+    }
 }

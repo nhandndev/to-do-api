@@ -24,7 +24,7 @@ public class AuthController {
     public ApiResponse<UserResponse> register (@RequestBody  @Valid RegisterRequest registerRequest) {
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
-                .message("Register successfully!")
+                .message("Regiaster successfully!")
                 .result(authenticationService.register(registerRequest))
                 .build();
     }

@@ -26,10 +26,15 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private static final String[] PUBLIC_ENDPOINTS = {"/user", "/auth/token", "/login", "/auth/introspect",
-            "/auth/logout", "/auth/refresh"};
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/auth/register",
+            "/auth/login",
+            "/auth/introspect",
+            "/auth/logout",
+            "/auth/refresh"
+    };
     @NonFinal
-    @Value("${jwt.signer-kÍey}")
+    @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
 
      @Bean
@@ -52,26 +57,26 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 //    @Autowired
-//    private CustomJwtDecoder customJwtDecoder;
+//    private CustomJwtDecoder customJwtDecoder;a
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
-        httpSecurity.csrf(csrf -> csrf.disable());
-
-        httpSecurity.authorizeHttpRequests(request -> request
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.OPTIONS , "/**").permitAll()
-                .anyRequest().authenticated()
-        );
-
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwtConfigurer -> jwtConfigurer
-                        .decoder(jwtDecoder())
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
+        httpSecurity
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-        );
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwtConfigurer -> jwtConfigurer
+                                .decoder(jwtDecoder())
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                        )
+                );
 
         return httpSecurity.build();
     }

@@ -62,5 +62,7 @@ public class GlobalExceptionHandler {
                .build();
        return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
    }
+   @ExceptionHander(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handle
 
 }
