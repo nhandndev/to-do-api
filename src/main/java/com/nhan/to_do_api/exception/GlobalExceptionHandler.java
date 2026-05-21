@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
    }
    @ExceptionHandler(AccessDeniedException.class)
    public ResponseEntity<ApiResponse<Void>> handleException(AccessDeniedException exception) {
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
    }
    @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception exception) {
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
    }
    @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ApiResponse<Void>> handleException(ValidationException exception) {
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
    }
    @ExceptionHandler(UnknownError.class)
     public ResponseEntity<ApiResponse<Void>> handleException(UnknownError exception) {
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getCode()).body(apiResponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
    }
    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleException(MethodArgumentNotValidException exception) {
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getCode()).body(apiresponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiresponse);
    }
 
 }

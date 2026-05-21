@@ -31,9 +31,6 @@ public class Todo {
     @Column(nullable = false)
     TodoStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    Priority priority;
 
     LocalDate dueDate;
 
@@ -47,7 +44,4 @@ public class Todo {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    Category category;
 }

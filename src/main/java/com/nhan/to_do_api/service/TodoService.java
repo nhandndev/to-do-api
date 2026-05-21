@@ -58,15 +58,14 @@ public class TodoService {
         User currentUser = getCurrentUser();
         Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
         todo.setUpdatedAt(LocalDateTime.now());
-        Todo todoUpdated = todoMapper.toTodo(todoUpdateRequest);
-        return todoMapper.toToDoResponse(todoRepository.save(todoUpdated));
+        return todoMapper.toToDoResponse(todoRepository.save(todo));
     }
     public TodoResponse StatusUpdate(Long id, TodoStatusUpdateRequest todoStatusUpdateRequest) {
         User currentUser = getCurrentUser();
         Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
         todo.setUpdatedAt(LocalDateTime.now());
         todo.setStatus(todoStatusUpdateRequest.getStatus());
-        return todoMapper.toToDoResponse(todo);
+        return todoMapper.toToDoResponse(todoRepository.save(todo));
     }
     public void deleteToDo(Long id) {
         User currentUser = getCurrentUser();

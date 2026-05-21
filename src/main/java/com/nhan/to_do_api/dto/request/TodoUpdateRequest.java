@@ -16,6 +16,5 @@ public class TodoUpdateRequest {
     String title;
     String description;
     TodoStatus status;
-    Priority priority;
     Date dueDate;
 }
