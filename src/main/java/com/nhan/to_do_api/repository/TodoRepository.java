@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TodoRepository extends JpaRepository<com.nhan.to_do_api.entity.Todo, Long> {
     Optional<Todo> findById (long id);
-    Optional<Todo> findByUser (User user);
+    Optional<Todo> findAllByUser (User user);
+    Optional<Todo> findByIdAndUser (Long id, User user);
 }

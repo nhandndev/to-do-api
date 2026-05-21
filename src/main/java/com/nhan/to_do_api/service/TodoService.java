@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class TodoService {
@@ -43,10 +44,13 @@ public class TodoService {
         User user = userRepository.findByUsername(authentication).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return user;
     }
-    public TodoResponse getToDo (String userName) {
-        User user = userRepository.findByUsername(userName).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        Long id = user.getId();
-        Todo todo = todoRepository.findByUser(id).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
-
+    public List<TodoResponse> getMyToDos () {
+        User currentUser = getCurrentUser();
+        return todoRepository.findAllByUser(currentUser).map(todo -> todoMapper.toToDoResponse(todo)).stream().toList();
+    }
+    public TodoResponse getToDoById (Long id) {
+        User currentUser = getCurrentUser();
+        Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+        return todoMapper.toToDoResponse(todo);
     }
 }

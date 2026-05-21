@@ -23,4 +23,5 @@ public class UserService {
         User user = userRepository.findByUsername(userName).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return  userMapper.toUserResponse(user);
     }
+
 }

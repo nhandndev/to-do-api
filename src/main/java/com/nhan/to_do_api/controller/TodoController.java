@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/todos")
 public class TodoController {
@@ -25,11 +27,19 @@ public class TodoController {
                 .build();
     }
     @GetMapping
-    public ApiResponse<TodoResponse> getToDo (@RequestParam @Valid String userName){
+    public ApiResponse<List<TodoResponse>> getToDo (){
+        return ApiResponse.<List<TodoResponse>>builder()
+                .code(1000)
+                .message("Get Successfully")
+                .result(todoService.getMyToDos())
+                .build();
+    }
+    @GetMapping("/{id}")
+    public ApiResponse<TodoResponse> getToDoById (@RequestParam @Valid Long id){
         return ApiResponse.<TodoResponse>builder()
                 .code(1000)
                 .message("Get Successfully")
-                .result(todoService.getToDo(userName))
+                .result(todoService.getToDoById(id))
                 .build();
     }
 }
