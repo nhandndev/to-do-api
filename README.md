@@ -157,7 +157,6 @@ Tất cả các API của hệ thống đều được trả về dưới một 
   "code": 1000,
   "message": "Success",
   "result": {
-    // Dữ liệu trả về (Object hoặc Array)
   }
 }
 ```
