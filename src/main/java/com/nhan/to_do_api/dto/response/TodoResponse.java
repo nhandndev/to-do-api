@@ -15,11 +15,9 @@ public class TodoResponse {
    String title;
    String description;
    TodoStatus status;
-   Priority priority;
    LocalDate dueDate;
    LocalDateTime completedAt;
    LocalDateTime createdAt;
-   CategoryResponse category;
 
 
 }

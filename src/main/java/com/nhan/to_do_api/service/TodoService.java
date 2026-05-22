@@ -45,9 +45,12 @@ public class TodoService {
         User user = userRepository.findByUsername(authentication).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return user;
     }
-    public List<TodoResponse> getMyToDos () {
+    public List<TodoResponse> getMyToDos() {
         User currentUser = getCurrentUser();
-        return todoRepository.findAllByUser(currentUser).map(todo -> todoMapper.toToDoResponse(todo)).stream().toList();
+        return todoRepository.findAllByUser(currentUser)
+                .stream()
+                .map(Todo -> todoMapper.toToDoResponse(Todo))
+                .toList();
     }
     public TodoResponse getToDo(Long id) {
         User currentUser = getCurrentUser();
