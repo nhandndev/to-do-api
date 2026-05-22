@@ -29,7 +29,7 @@ public class AuthController {
                 .build();
     }
     @PostMapping("/login")
-    public ApiResponse<AuthenticationResponse> login (@RequestBody AuthenticationRequest authenticationRequest) {
+    public ApiResponse<AuthenticationResponse> login (@RequestBody @Valid AuthenticationRequest authenticationRequest) {
         return ApiResponse.<AuthenticationResponse>builder()
                 .code(1000)
                 .message("Login successfully!")

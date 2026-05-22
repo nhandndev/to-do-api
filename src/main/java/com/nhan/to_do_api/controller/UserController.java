@@ -4,6 +4,7 @@ import com.nhan.to_do_api.dto.response.ApiResponse;
 import com.nhan.to_do_api.dto.response.UserResponse;
 import com.nhan.to_do_api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
     @Autowired
     private UserService userService;
-    @PostMapping("/me")
+    @GetMapping("/me")
     public ApiResponse<UserResponse> getMyInfo(){
        return ApiResponse.<UserResponse>builder()
                .code(1000)

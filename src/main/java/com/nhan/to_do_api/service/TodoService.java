@@ -57,13 +57,20 @@ public class TodoService {
         Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
         return todoMapper.toToDoResponse(todo);
     }
-    public TodoResponse updateToDo(Long id, TodoUpdateRequest todoUpdateRequest) {
+    public TodoResponse updateToDo(Long id, TodoUpdateRequest request) {
         User currentUser = getCurrentUser();
-        Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+
+        Todo todo = todoRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
+
+        todo.setTitle(request.getTitle());
+        todo.setDescription(request.getDescription());
+        todo.setStatus(request.getStatus());
         todo.setUpdatedAt(LocalDateTime.now());
+
         return todoMapper.toToDoResponse(todoRepository.save(todo));
     }
-    public TodoResponse StatusUpdate(Long id, TodoStatusUpdateRequest todoStatusUpdateRequest) {
+    public TodoResponse updateStatus(Long id, TodoStatusUpdateRequest todoStatusUpdateRequest) {
         User currentUser = getCurrentUser();
         Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
         todo.setUpdatedAt(LocalDateTime.now());
@@ -75,4 +82,5 @@ public class TodoService {
         Todo todo = todoRepository.findByIdAndUser(id,currentUser).orElseThrow(() -> new AppException(ErrorCode.TODO_NOT_FOUND));
         todoRepository.delete(todo);
     }
+
 }

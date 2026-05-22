@@ -4,15 +4,15 @@ import com.nhan.to_do_api.enums.TodoStatus;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
 public class TodoUpdateRequest {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @NotBlank
     String title;
     String description;
     TodoStatus status;

@@ -16,6 +16,7 @@ public enum ErrorCode {
     USERNAME_ALREADY_EXISTS(4002, "Username already exists", HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_EXISTS(4003, "Email already exists", HttpStatus.BAD_REQUEST),
     INVALID_USERNAME_OR_PASSWORD(4004, "Invalid username or password", HttpStatus.UNAUTHORIZED),
+    USER_DISABLED(7005, "User disabled", HttpStatus.FORBIDDEN), //Add Nex ErrorCode
     //author
     UNAUTHORIZED(4005, "Unauthorized", HttpStatus.UNAUTHORIZED),
     FORBIDDEN(4006, "Forbidden", HttpStatus.FORBIDDEN),

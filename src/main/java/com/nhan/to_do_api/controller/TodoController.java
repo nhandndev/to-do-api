@@ -54,7 +54,7 @@ public class TodoController {
         return ApiResponse.<TodoResponse>builder()
                 .code(1000)
                 .message("Toggle Complete")
-                .result(todoService.StatusUpdate(id,todoStatusUpdateRequest))
+                .result(todoService.updateStatus(id,todoStatusUpdateRequest))
                 .build();
     }
     @DeleteMapping("/{id}")

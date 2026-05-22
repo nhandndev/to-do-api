@@ -60,6 +60,9 @@ public class AuthenticationService {
        var user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD));
        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
        if(!authenticated) {
+           throw new AppException(ErrorCode.USER_DISABLED);
+       }
+       if(!user.getEnabled()) {
            throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
        }
        String token = generateToken(user);
@@ -74,7 +77,7 @@ public class AuthenticationService {
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT).build();
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().subject(user.getUsername()).issuer("DoanNgocNhan")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(9999, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(3600, ChronoUnit.SECONDS).toEpochMilli()))
                 .build();
 //                .jwtID(UUID.randomUUID().toString()).claim("scope", buildScope(user)).build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -106,7 +109,7 @@ public class AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date ExpirationDate = (isRefresh)
                 ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
-                .plus(9999, ChronoUnit.SECONDS).toEpochMilli())
+                .plus(3600, ChronoUnit.SECONDS).toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean verified = signedJWT.verify(verifier);
         if (!(verified && ExpirationDate.after(new Date()))) {

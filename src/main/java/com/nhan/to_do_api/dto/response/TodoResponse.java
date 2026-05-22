@@ -18,6 +18,5 @@ public class TodoResponse {
    LocalDate dueDate;
    LocalDateTime completedAt;
    LocalDateTime createdAt;
-
-
+   LocalDateTime updatedAt;
 }
