@@ -1,1590 +1,494 @@
-# Todo App API - Project Requirements
+# 📝 Todo API - Spring Boot & Spring Security Backend
 
-## 1. Project Overview
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Security](https://img.shields.io/badge/Spring%20Security-6-blue.svg)](https://spring.io/projects/spring-security)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
+[![Java](https://img.shields.io/badge/Java-17%20%2F%2021-red.svg)](https://www.oracle.com/java/)
+[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
-Build a backend REST API for a personal Todo App using Spring Boot 3.
-
-The system allows users to register, login, manage their own todos, organize todos by categories, filter/search todos, and protect data using JWT authentication.
-
-This project is intended to practice real backend development with:
-
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- JWT Authentication
-- MySQL
-- Validation
-- Global Exception Handling
-- Docker
-- Docker Compose
-- Unit Test / Controller Test
-- Swagger/OpenAPI
+Dự án **Todo API** là hệ thống Backend hoàn chỉnh được xây dựng trên nền tảng **Spring Boot 3.2.5**, kết hợp **Spring Security 6** và cơ chế xác thực **JWT (JSON Web Token)**. Hệ thống cung cấp các RESTful API bảo mật và hiệu năng cao giúp quản lý công việc (Todo) cá nhân của người dùng với tính bảo mật và toàn vẹn dữ liệu ở mức tối đa.
 
 ---
 
-## 2. Main Goals
+## ✨ Điểm Nổi Bật Của Hệ Thống
 
-The project should help practice:
-
-1. Building REST APIs with Spring Boot 3.
-2. Designing DTO request/response classes.
-3. Using MySQL with Spring Data JPA.
-4. Implementing JWT authentication.
-5. Protecting APIs with Spring Security.
-6. Handling validation and business errors.
-7. Applying clean project structure.
-8. Running the application with Docker and Docker Compose.
-9. Writing basic tests.
-10. Creating a clean README for portfolio.
+*   🔒 **Bảo mật tuyệt đối với JWT**: Quá trình đăng nhập cấp phát Access Token có hiệu lực trong 1 giờ. Tất cả các endpoint quản lý Todo đều được bảo vệ nghiêm ngặt.
+*   🛡️ **Cô lập dữ liệu người dùng (Data Isolation)**: Sử dụng các câu truy vấn thông minh (`findByIdAndUser` và `findAllByUser`) nhằm đảm bảo người dùng **chỉ** có quyền xem, sửa, xóa các Todo do chính họ tạo ra.
+*   📐 **Kiến trúc phân tầng chuẩn (Layered Architecture)**: Tổ chức mã nguồn khoa học theo mô hình `Controller - Service - Repository - Entity - DTO` giúp dự án dễ bảo trì và mở rộng.
+*   💥 **Xử lý ngoại lệ tập trung (Global Exception Handling)**: Định nghĩa hệ thống `ErrorCode` tùy chỉnh kết hợp ánh xạ tự động mã lỗi sang các HTTP Status Code tương ứng.
+*   🔄 **MapStruct & Lombok**: Giảm thiểu tối đa code thừa (boilerplate code), tối ưu hóa tốc độ ánh xạ dữ liệu giữa DTO và Entity.
+*   🎯 **Validation đầu vào chặt chẽ**: Rà soát định dạng Email, độ dài Username, Password và các trường dữ liệu bắt buộc bằng `@NotBlank`, `@Size`, `@NotNull`.
 
 ---
 
-## 3. Tech Stack
+## 🛠️ Công Nghệ Sử Dụng (Technology Stack)
 
-### Backend
-
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- Spring Validation
-- MySQL Driver
-- Lombok
-- JWT library
-- Swagger/OpenAPI
-
-### Database
-
-- MySQL 8
-
-### DevOps
-
-- Docker
-- Docker Compose
-
-### Testing
-
-- JUnit 5
-- Mockito
-- Spring Boot Test
-- MockMvc
-
-Optional advanced:
-
-- TestContainers
-- JaCoCo
+| Thành phần | Công nghệ | Phiên bản | Mô tả |
+| :--- | :--- | :--- | :--- |
+| **Language** | Java | 17 / 21+ | Ngôn ngữ lập trình chính |
+| **Framework** | Spring Boot | 3.2.5 | Nền tảng cốt lõi của ứng dụng |
+| **Security** | Spring Security | 6 | Xác thực và phân quyền dựa trên JWT |
+| **JWT Library**| Nimbus JOSE + JWT | 9.x | Sinh và xác thực mã Token |
+| **Database** | MySQL | 8.0 | Hệ quản trị cơ sở dữ liệu quan hệ |
+| **ORM** | Spring Data JPA | 3.2.5 | Tương tác cơ sở dữ liệu thông qua Hibernate |
+| **Mapping** | MapStruct | 1.5.5.Final | Tự động ánh xạ Object-to-Object |
+| **Helper** | Lombok | 1.18.30 | Tự động sinh Getter, Setter, Builder |
+| **Validation** | Jakarta Validation | 3.0.2 | Kiểm tra dữ liệu đầu vào |
 
 ---
 
-## 4. Project Structure
+## 📁 Cấu Trúc Mã Nguồn (Package Structure)
+
+Dự án được cấu trúc theo chuẩn công nghiệp giúp dễ dàng phát triển và kiểm thử:
 
 ```text
-todo-app-api
-└── src/main/java/com/nhan/todoapp
-    ├── configuration
-    ├── controller
-    ├── dto
-    │   ├── request
-    │   └── response
-    ├── entity
-    ├── enums
-    ├── exception
-    ├── mapper
-    ├── repository
-    ├── security
-    ├── service
-    └── util
-```
-
-Suggested packages:
-
-```text
-configuration
-- SecurityConfig
-- OpenApiConfig
-- ApplicationInitConfig
-
-controller
-- AuthController
-- UserController
-- TodoController
-- CategoryController
-
-dto/request
-- RegisterRequest
-- AuthenticationRequest
-- ChangePasswordRequest
-- TodoCreationRequest
-- TodoUpdateRequest
-- TodoStatusUpdateRequest
-- CategoryCreationRequest
-- CategoryUpdateRequest
-
-dto/response
-- ApiResponse
-- AuthenticationResponse
-- UserResponse
-- TodoResponse
-- CategoryResponse
-
-entity
-- User
-- Todo
-- Category
-
-enums
-- Role
-- TodoStatus
-- Priority
-
-exception
-- AppException
-- ErrorCode
-- GlobalExceptionHandler
-
-repository
-- UserRepository
-- TodoRepository
-- CategoryRepository
-
-service
-- AuthenticationService
-- UserService
-- TodoService
-- CategoryService
-
-security
-- JwtTokenProvider
-- JwtAuthenticationFilter
-- CustomUserDetailsService
+to-do-api/
+├── src/
+│   ├── main/
+│   │   ├── java/com/nhan/to_do_api/
+│   │   │   ├── configuration/     # Cấu hình Security, CORS, OpenAPI, AppInit
+│   │   │   ├── controller/        # Tầng API Controllers (Định nghĩa endpoint)
+│   │   │   ├── dto/               # Đối tượng truyền tải dữ liệu (DTO)
+│   │   │   │   ├── request/       # DTO đầu vào (Register, Login, Todo...)
+│   │   │   │   └── response/      # DTO trả về chuẩn hóa (ApiResponse, User...)
+│   │   │   ├── entity/            # Thực thể Hibernate tương ứng bảng cơ sở dữ liệu
+│   │   │   ├── enums/             # Các Enum của hệ thống (Role, TodoStatus)
+│   │   │   ├── exception/         # Xử lý lỗi toàn cục (Global Exception Handlers)
+│   │   │   ├── mapper/            # Giao diện MapStruct dùng để convert DTO <-> Entity
+│   │   │   ├── repository/        # Tầng giao tiếp với Database (Spring Data JPA)
+│   │   │   ├── service/           # Tầng chứa logic nghiệp vụ chính (Business Logic)
+│   │   │   └── ToDoApiApplication.java # Lớp khởi chạy ứng dụng
+│   │   └── resources/
+│   │       ├── application.yml    # File cấu hình cấu trúc hệ thống & Database
+│   │       └── ...
+│   └── test/                      # Thư mục chứa các Unit & Integration Testcases
+├── pom.xml                        # Quản lý thư viện và plugin Maven
+└── README.md                      # Tài liệu hướng dẫn dự án
 ```
 
 ---
 
-## 4.5. Implementation Phases (Roadmap)
+## 🗄️ Thiết Kế Cơ Sở Dữ Liệu (Database Design)
 
-Dưới đây là lộ trình từng bước (Phase by Phase) chi tiết, mình đã gom luôn các **Requirements thiết yếu** vào ngay trong từng Phase để bạn đọc và code luôn mà không cần phải cuộn chuột tìm kiếm:
-
-### Phase 1: Database & Entities (Nền tảng dữ liệu)
-- **Mục tiêu:** Thiết kế cơ sở dữ liệu và ánh xạ sang code Java.
-- **Công việc & Yêu cầu:**
-  1. **Cấu hình database** trong `application.yml`: url `jdbc:mysql://localhost:3306/todo_app`, tài khoản `root`, tự động tạo bảng với `ddl-auto: update`.
-  2. **Tạo các Enums**:
-     - `Role`: `USER`, `ADMIN`
-     - `TodoStatus`: `TODO`, `IN_PROGRESS`, `DONE`, `CANCELLED`
-     - `Priority`: `LOW`, `MEDIUM`, `HIGH`
-  3. **Code Entity Classes**:
-     - **User Entity:** `id` (Long, PK), `username` (String, unique), `email` (String, unique), `password` (String), `role` (Role enum), `enabled` (Boolean), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
-     - **Category Entity:** `id` (Long, PK), `name` (String, unique per user), `color` (String), `user` (User, FK `user_id`), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
-     - **Todo Entity:** `id` (Long, PK), `title` (String), `description` (String), `status` (TodoStatus enum, default TODO), `priority` (Priority enum), `dueDate` (LocalDate), `completedAt` (LocalDateTime), `user` (User, FK `user_id`), `category` (Category, FK `category_id`), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
-
-### Phase 2: Repositories & DTOs (Tầng truy xuất và truyền tải)
-- **Mục tiêu:** Tạo interface truy cập DB và các object request/response API.
-- **Công việc & Yêu cầu:**
-  1. Tạo các class trong `repository` kế thừa `JpaRepository<Entity, Long>`.
-  2. **Tạo class bọc Response chuẩn:** `ApiResponse<T>` với 3 trường: `code` (int), `message` (String), `result` (T).
-  3. **Code các DTOs:**
-     - **Auth DTOs:** 
-       - `RegisterRequest`: `username` (String), `email` (String), `password` (String)
-       - `AuthenticationRequest`: `username` (String), `password` (String)
-       - `AuthenticationResponse`: `token` (String), `authenticated` (boolean)
-     - **Todo DTOs:** 
-       - `TodoCreationRequest`: `title` (String), `priority` (Priority enum), `dueDate` (LocalDate), `categoryId` (Long)
-       - `TodoUpdateRequest`: `title` (String), `description` (String), `status` (TodoStatus enum), `priority` (Priority enum), `dueDate` (LocalDate), `categoryId` (Long)
-       - `TodoStatusUpdateRequest`: `status` (TodoStatus enum)
-       - `TodoResponse`: `id` (Long), `title` (String), `description` (String), `status` (TodoStatus enum), `priority` (Priority enum), `dueDate` (LocalDate), `completedAt` (LocalDateTime), `category` (CategoryResponse)
-     - **Category DTOs:** 
-       - `CategoryCreationRequest`: `name` (String), `color` (String)
-       - `CategoryUpdateRequest`: `name` (String), `color` (String)
-       - `CategoryResponse`: `id` (Long), `name` (String), `color` (String)
-     - **User DTOs:** 
-       - `UserResponse`: `id` (Long), `username` (String), `email` (String), `role` (Role enum), `enabled` (boolean)
-
-### Phase 3: Exception Handling & Services (Logic nghiệp vụ và Xử lý lỗi)
-- **Mục tiêu:** Xử lý logic cốt lõi và bắt lỗi tập trung.
-- **Công việc & Yêu cầu:**
-  1. **Tạo `ErrorCode` Enum:** Khai báo mã lỗi ví dụ `SUCCESS(1000)`, `INVALID_REQUEST(4000)`, `USER_NOT_FOUND(4001)`, `UNAUTHORIZED(4005)`, `TODO_NOT_FOUND(4007)`, `CATEGORY_NOT_FOUND(4008)`, v.v.
-  2. **Bắt lỗi Global:** Tạo `AppException` và `GlobalExceptionHandler` trả về JSON `ApiResponse` theo ErrorCode.
-  3. **Validation (Jakarta):** Gắn annotation lên DTO (Ví dụ: `@NotBlank` cho title, `@Email` cho email, password `@Size(min=6)`).
-  4. **Code Service Logic (Chưa cần Security):**
-     - Status Todo đổi sang `DONE` -> tự động set `completedAt = now()`. Đổi từ `DONE` sang trạng thái khác -> `completedAt = null`.
-     - Không cho xóa Category nếu Category đó vẫn đang chứa Todo.
-     - Các method service tạm thời nhận User ID dưới dạng tham số truyền vào để test.
-
-### Phase 4: Controllers (Tạo API Endpoints)
-- **Mục tiêu:** Mở các endpoint API để test qua Postman.
-- **Công việc & Yêu cầu:**
-  - `AuthController`: Mở `POST /auth/register`, `POST /auth/login`
-  - `UserController`: Mở `GET /users/me`, `PATCH /users/me/password`
-  - `TodoController`: Mở `POST /todos`, `GET /todos` (nhận param filter: status, priority, keyword, page, size), `GET /todos/{id}`, `PUT /todos/{id}`, `DELETE /todos/{id}`, `PATCH /todos/{id}/status`
-  - `CategoryController`: Mở `POST /categories`, `GET /categories`, `GET /categories/{id}`, `PUT /categories/{id}`, `DELETE /categories/{id}`
-
-### Phase 5: Spring Security & JWT (Bảo mật)
-- **Mục tiêu:** Khóa API, yêu cầu đăng nhập và phân quyền bằng JWT.
-- **Công việc & Yêu cầu:**
-  1. **Config Security:** Thêm `SecurityConfig`, dùng `BCryptPasswordEncoder` để mã hóa mật khẩu trước khi lưu.
-  2. **Bảo vệ URL:** Public URL `/auth/**`, `/swagger-ui/**`. Khóa tất cả các API còn lại.
-  3. **JWT Token:** Viết `JwtTokenProvider` tạo token lưu subject là `username`, chứa claim `role`, hết hạn sau 1 giờ.
-  4. **Filter:** Viết `JwtAuthenticationFilter` đọc header `Authorization: Bearer <token>`, parse ra user và lưu vào `SecurityContextHolder`.
-  5. **Cập nhật Service:** Xóa tham số User ID tĩnh truyền vào Service. Thay vào đó lấy ID của user thật đang đăng nhập từ `SecurityContextHolder`, đảm bảo chỉ được xem/sửa Todo/Category của chính mình.
-
-### Phase 6: Refactoring & Testing (Hoàn thiện)
-- **Mục tiêu:** Làm sạch code và đưa app lên Docker.
-- **Công việc & Yêu cầu:**
-  1. Tích hợp thư viện `MapStruct` để tự động map Entity <-> DTO.
-  2. Viết Unit Test cho Service sử dụng `Mockito`.
-  3. Tạo `Dockerfile` để build app thành Image.
-  4. Viết `docker-compose.yml` để chạy cả App và MySQL Database bằng 1 dòng lệnh.
-
-
-
-## 5. Core Features
-
-## 5.1 Authentication
-
-### Features
-
-- Register account
-- Login account
-- Get current user information
-- Change password
-- Protect APIs with JWT
-- Hash password before saving to database
-
-### APIs
-
-```http
-POST /auth/register
-POST /auth/login
-GET /users/me
-PATCH /users/me/password
-```
-
-### Register Request
-
-```json
-{
-  "username": "nhan",
-  "email": "nhan@example.com",
-  "password": "123456"
-}
-```
-
-### Login Request
-
-```json
-{
-  "username": "nhan",
-  "password": "123456"
-}
-```
-
-### Authentication Response
-
-```json
-{
-  "code": 1000,
-  "result": {
-    "token": "jwt-token-here",
-    "authenticated": true
-  }
-}
-```
-
-### Business Rules
-
-- ~~Username must be unique.
-- Email must be unique.~~
-- Password must be at ~~least 6 characters~~.
-- Password must be encoded before saving.
-- Login fails if username does not exist.
-- Login fails if password is wrong.
-- Protected APIs require a valid JWT token.
-
----
-
-## 5.2 User Management
-
-### Features
-
-- Get current user profile.
-- Admin can view all users.
-- Admin can lock or unlock users.
-
-### APIs
-
-```http
-GET /users/me
-GET /users
-PATCH /users/{id}/status
-```
-
-### User Response
-
-```json
-{
-  "id": 1,
-  "username": "nhan",
-  "email": "nhan@example.com",
-  "role": "USER",
-  "enabled": true,
-  "createdAt": "2026-05-20T10:00:00",
-  "updatedAt": "2026-05-20T10:00:00"
-}
-```
-
-### Business Rules
-[README.md](README.md)
-- Normal users can only view their own profile.
-- Admin can view all users.
-- Locked users cannot login.
-- User role is USER by default.
-- Admin role may be created manually or by application initializer.
-
----
-
-## 5.3 Todo Management
-
-### Features
-
-- Create todo
-- View todo list
-- View todo detail
-- Update todo
-- Delete todo
-- Change todo status
-- Search todo by keyword
-- Filter todo by status
-- Filter todo by priority
-- Filter todo by category
-- Sort todo by due date
-- Pagination
-
-### APIs
-
-```http
-POST /todos
-GET /todos
-GET /todos/{id}
-PUT /todos/{id}
-DELETE /todos/{id}
-PATCH /todos/{id}/status
-```
-
-### Query APIs
-
-```http
-GET /todos?status=TODO
-GET /todos?status=DONE
-GET /todos?priority=HIGH
-GET /todos?categoryId=1
-GET /todos?keyword=spring
-GET /todos?page=0&size=10&sort=dueDate,asc
-```
-
-### Create Todo Request
-
-```json
-{
-  "title": "Learn Spring Security",
-  "description": "Review JWT authentication",
-  "priority": "HIGH",
-  "dueDate": "2026-05-25",
-  "categoryId": 1
-}
-```
-
-### Update Todo Request
-
-```json
-{
-  "title": "Learn Spring Security and JWT",
-  "description": "Review security filter chain",
-  "status": "IN_PROGRESS",
-  "priority": "HIGH",
-  "dueDate": "2026-05-26",
-  "categoryId": 1
-}
-```
-
-### Update Todo Status Request
-
-```json
-{
-  "status": "DONE"
-}
-```
-
-### Todo Response
-
-```json
-{
-  "id": 1,
-  "title": "Learn Spring Security",
-  "description": "Review JWT authentication",
-  "status": "TODO",
-  "priority": "HIGH",
-  "dueDate": "2026-05-25",
-  "completedAt": null,
-  "category": {
-    "id": 1,
-    "name": "Study",
-    "color": "#3B82F6"
-  },
-  "createdAt": "2026-05-20T10:00:00",
-  "updatedAt": "2026-05-20T10:00:00"
-}
-```
-
-### Business Rules
-
-- Todo title must not be blank.
-- Todo belongs to the authenticated user.
-- User can only view, update, or delete their own todos.
-- Admin may view all todos if implemented.
-- Due date should not be in the past.
-- Default todo status is TODO.
-- If todo status becomes DONE, set completedAt to current datetime.
-- If todo status changes from DONE to another status, clear completedAt.
-- If categoryId is provided, the category must belong to the current user.
-- Deleting a todo should only delete the current user's todo.
-
----
-
-## 5.4 Category Management
-
-### Features
-
-- Create category
-- View category list
-- Update category
-- Delete category
-
-### APIs
-
-```http
-POST /categories
-GET /categories
-GET /categories/{id}
-PUT /categories/{id}
-DELETE /categories/{id}
-```
-
-### Create Category Request
-
-```json
-{
-  "name": "Study",
-  "color": "#3B82F6"
-}
-```
-
-### Update Category Request
-
-```json
-{
-  "name": "Work",
-  "color": "#EF4444"
-}
-```
-
-### Category Response
-
-```json
-{
-  "id": 1,
-  "name": "Study",
-  "color": "#3B82F6",
-  "createdAt": "2026-05-20T10:00:00",
-  "updatedAt": "2026-05-20T10:00:00"
-}
-```
-
-### Business Rules
-
-- Category name must not be blank.
-- Category name must be unique for each user.
-- User can only manage their own categories.
-- Category color should be a valid hex color.
-- Do not allow deleting category if it still contains todos.
-- Or alternatively, when deleting category, set category of related todos to null.
-
-Recommended rule:
-
-- Do not allow deleting category if it still contains todos.
-
----
-
-## 6. Entities & Database UML
-
-Dưới đây là sơ đồ quan hệ thực thể (ERD) mô tả các bảng trong cơ sở dữ liệu:
+Hệ thống sử dụng cơ sở dữ liệu quan hệ **MySQL** với 2 bảng chính có mối quan hệ **Một - Nhiều (1 - N)**:
 
 ```mermaid
 erDiagram
-    USERS ||--o{ TODOS : "creates"
-    USERS ||--o{ CATEGORIES : "owns"
-    CATEGORIES ||--o{ TODOS : "contains"
-
-    USERS {
-        bigint id PK
-        varchar username
-        varchar email
-        varchar password
-        varchar role
-        boolean enabled
+    users {
+        bigint id PK "AUTO_INCREMENT"
+        varchar username UK "4-50 chars, NOT NULL"
+        varchar email UK "NOT NULL"
+        varchar password "NOT NULL"
+        varchar role "ENUM (USER, ADMIN), NOT NULL"
+        boolean enabled "NOT NULL"
         datetime created_at
         datetime updated_at
     }
-
-    CATEGORIES {
-        bigint id PK
-        varchar name
-        varchar color
-        bigint user_id FK
-        datetime created_at
-        datetime updated_at
-    }
-
-    TODOS {
-        bigint id PK
-        varchar title
+    todos {
+        bigint id PK "AUTO_INCREMENT"
+        varchar title "NOT NULL"
         text description
-        varchar status
-        varchar priority
+        varchar status "ENUM (TODO, IN_PROGRESS, DONE, CANCELED), NOT NULL"
         date due_date
         datetime completed_at
-        bigint user_id FK
-        bigint category_id FK
         datetime created_at
         datetime updated_at
+        bigint user_id FK "NOT NULL"
     }
+    users ||--o{ todos : "sở hữu (has)"
 ```
 
-## 6.1 User Entity
+### 1. Bảng `users` (Thông tin người dùng)
+*   `id`: Khóa chính, tự động tăng.
+*   `username`: Tên đăng nhập duy nhất (Unique), độ dài từ 4 đến 50 ký tự.
+*   `email`: Email duy nhất (Unique), đúng định dạng email.
+*   `password`: Mật khẩu được mã hóa bằng thuật toán **BCrypt Strong Hashing**.
+*   `role`: Quyền hạn người dùng (`USER` hoặc `ADMIN`), lưu trữ dạng chuỗi chữ.
+*   `enabled`: Trạng thái kích hoạt tài khoản (`true`/`false`).
 
-Fields:
+### 2. Bảng `todos` (Danh sách công việc)
+*   `id`: Khóa chính, tự động tăng.
+*   `title`: Tiêu đề công việc, bắt buộc nhập, độ dài từ 4 đến 100 ký tự.
+*   `description`: Mô tả chi tiết (kiểu `TEXT` trong cơ sở dữ liệu).
+*   `status`: Trạng thái công việc (`TODO`, `IN_PROGRESS`, `DONE`, `CANCELED`).
+*   `due_date`: Hạn hoàn thành (LocalDate).
+*   `completed_at`: Thời điểm đánh dấu hoàn thành (LocalDateTime).
+*   `user_id`: Khóa ngoại liên kết chặt chẽ tới bảng `users` (`ON DELETE CASCADE`).
 
-```text
-id: Long
-username: String
-email: String
-password: String
-role: Role
-enabled: Boolean
-createdAt: LocalDateTime
-updatedAt: LocalDateTime
-```
+---
 
-Relationships:
+## 🔒 Luồng Xác Thực & Phân Quyền (Security Flow)
 
-```text
-User 1 - n Todo
-User 1 - n Category
+Hệ thống bảo vệ toàn bộ API Todos bằng cơ chế Token-based Authentication:
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant AuthAPI as AuthController
+    participant Security as SecurityFilterChain
+    participant TodoAPI as TodoController
+    
+    %% Đăng nhập / Đăng ký công khai
+    Client->>AuthAPI: POST /api/auth/login (username, password)
+    AuthAPI->>Client: Trả về JWT Token (Access Token)
+    
+    %% Gọi API được bảo vệ
+    rect rgb(240, 248, 255)
+        note right of Client: Gửi kèm Header: Authorization: Bearer <Token>
+        Client->>Security: GET /api/todos (Yêu cầu lấy danh sách Todos)
+        alt Token hợp lệ
+            Security->>TodoAPI: Cho phép đi tiếp vào Service xử lý
+            TodoAPI->>Client: HTTP 200 OK + Danh sách Todos
+        else Token hết hạn hoặc không hợp lệ
+            Security->>Client: HTTP 401 Unauthorized
+        end
+    end
 ```
 
 ---
 
-## 6.2 Todo Entity
+## ✉️ Định Dạng API Response Chuẩn
 
-Fields:
+Tất cả các API của hệ thống đều được trả về dưới một định dạng JSON thống nhất để Client (Frontend) dễ dàng xử lý:
 
-```text
-id: Long
-title: String
-description: String
-status: TodoStatus
-priority: Priority
-dueDate: LocalDate
-completedAt: LocalDateTime
-createdAt: LocalDateTime
-updatedAt: LocalDateTime
-```
-
-Relationships:
-
-```text
-Todo n - 1 User
-Todo n - 1 Category
-```
-
----
-
-## 6.3 Category Entity
-
-Fields:
-
-```text
-id: Long
-name: String
-color: String
-createdAt: LocalDateTime
-updatedAt: LocalDateTime
-```
-
-Relationships:
-
-```text
-Category n - 1 User
-Category 1 - n Todo
-```
-
----
-
-## 7. Enums
-
-### Role
-
-```java
-public enum Role {
-    USER,
-    ADMIN
-}
-```
-
-### TodoStatus
-
-```java
-public enum TodoStatus {
-    TODO,
-    IN_PROGRESS,
-    DONE,
-    CANCELLED
-}
-```
-
-### Priority
-
-```java
-public enum Priority {
-    LOW,
-    MEDIUM,
-    HIGH
-}
-```
-
----
-
-## 8. API Response Format
-
-All APIs should return a common response format.
-
-### Success Response
-
+### 1. Response Thành Công (Success Response)
 ```json
 {
   "code": 1000,
   "message": "Success",
-  "result": {}
+  "result": {
+    // Dữ liệu trả về (Object hoặc Array)
+  }
 }
 ```
 
-### Error Response
-
+### 2. Response Lỗi (Error Response)
 ```json
 {
-  "code": 4001,
-  "message": "Todo not found"
+  "code": 4004,
+  "message": "Invalid username or password",
+  "result": null
 }
 ```
 
-### ApiResponse Class
+---
 
-Fields:
+## 🔌 Chi Tiết Các RESTful API Endpoints
 
-```text
-code: int
-message: String
-result: T
-```
+Tất cả các API được cấu hình với tiền tố `/api`.
+
+### 1. Xác thực & Phân quyền (Authentication APIs)
+
+#### 📝 Đăng Ký Tài Khoản (Register)
+*   **Endpoint**: `POST /api/auth/register`
+*   **Quyền truy cập**: Public (Công khai)
+*   **Request Body**:
+    ```json
+    {
+      "username": "tester",
+      "email": "tester@example.com",
+      "password": "securepassword123"
+    }
+    ```
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Register successfully!",
+      "result": {
+        "id": 1,
+        "username": "tester",
+        "email": "tester@example.com",
+        "role": "USER",
+        "enabled": true
+      }
+    }
+    ```
+
+#### 🔑 Đăng Nhập (Login)
+*   **Endpoint**: `POST /api/auth/login`
+*   **Quyền truy cập**: Public (Công khai)
+*   **Request Body**:
+    ```json
+    {
+      "username": "tester",
+      "password": "securepassword123"
+    }
+    ```
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Login successfully!",
+      "result": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0ZXIiLCJpc3MiOiJuaGFuLmNvbSIsImV4cCI6MTcxOTk...",
+        "authenticated": true
+      }
+    }
+    ```
 
 ---
 
-## 9. Error Handling
+### 2. Thông tin người dùng (User APIs)
 
-Use a global exception handler.
-
-### Required Error Codes
-
-```text
-1000 - Success
-
-4000 - Invalid request
-4001 - User not found
-4002 - Username already exists
-4003 - Email already exists
-4004 - Invalid username or password
-4005 - Unauthorized
-4006 - Forbidden
-4007 - Todo not found
-4008 - Category not found
-4009 - Category name already exists
-4010 - Cannot delete category because it still has todos
-4011 - Invalid todo status
-4012 - Invalid due date
-4013 - Old password is incorrect
-5000 - Internal server error
-```
+#### 👤 Lấy Thông Tin Người Dùng Hiện Tại (Get My Info)
+*   **Endpoint**: `GET /api/users/me`
+*   **Quyền truy cập**: Yêu cầu Header `Authorization: Bearer <JWT_TOKEN>`
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "getMyInfo successfully!",
+      "result": {
+        "id": 1,
+        "username": "tester",
+        "email": "tester@example.com",
+        "role": "USER",
+        "enabled": true
+      }
+    }
+    ```
 
 ---
 
-## 10. Validation Rules
+### 3. Quản lý công việc (Todo APIs)
+> [!IMPORTANT]
+> Tất cả các API dưới đây đều yêu cầu truyền kèm Token xác thực trong Header:
+> `Authorization: Bearer <YOUR_JWT_TOKEN>`
 
-Use Jakarta Validation.
+#### ➕ Tạo Mới Todo (Create Todo)
+*   **Endpoint**: `POST /api/todos`
+*   **Request Body**:
+    ```json
+    {
+      "title": "Học Spring Security 6",
+      "description": "Nghiên cứu cấu trúc JWTDecoder và SecurityFilterChain",
+      "status": "TODO"
+    }
+    ```
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Create Successfully",
+      "result": {
+        "id": 12,
+        "title": "Học Spring Security 6",
+        "description": "Nghiên cứu cấu trúc JWTDecoder và SecurityFilterChain",
+        "status": "TODO",
+        "dueDate": null,
+        "completedAt": null,
+        "createdAt": "2026-05-22T18:30:00",
+        "updatedAt": "2026-05-22T18:30:00"
+      }
+    }
+    ```
 
-### RegisterRequest
+#### 📋 Lấy Danh Sách Todo Của Bản Thân (Get My Todos)
+*   **Endpoint**: `GET /api/todos`
+*   **Đặc điểm**: Chỉ trả về danh sách các Todo thuộc sở hữu của User đang gọi API.
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Get Successfully",
+      "result": [
+        {
+          "id": 12,
+          "title": "Học Spring Security 6",
+          "description": "Nghiên cứu cấu trúc JWTDecoder và SecurityFilterChain",
+          "status": "TODO",
+          "dueDate": null,
+          "completedAt": null,
+          "createdAt": "2026-05-22T18:30:00",
+          "updatedAt": "2026-05-22T18:30:00"
+        }
+      ]
+    }
+    ```
 
-```text
-username: not blank, min 4, max 50
-email: not blank, valid email
-password: not blank, min 6
-```
+#### 🔍 Xem Chi Tiết Một Todo (Get Todo By ID)
+*   **Endpoint**: `GET /api/todos/{id}`
+*   **Đặc điểm**: Trả về lỗi `4007 (Todo not found)` nếu ID không tồn tại hoặc Todo thuộc về người khác.
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Get Successfully",
+      "result": {
+        "id": 12,
+        "title": "Học Spring Security 6",
+        "description": "Nghiên cứu cấu trúc JWTDecoder và SecurityFilterChain",
+        "status": "TODO",
+        "dueDate": null,
+        "completedAt": null,
+        "createdAt": "2026-05-22T18:30:00",
+        "updatedAt": "2026-05-22T18:30:00"
+      }
+    }
+    ```
 
-### AuthenticationRequest
+#### 🔄 Cập Nhật Toàn Bộ Todo (Update Todo)
+*   **Endpoint**: `PUT /api/todos/{id}`
+*   **Request Body**:
+    ```json
+    {
+      "title": "Học Spring Security nâng cao",
+      "description": "Hoàn thành nghiên cứu OAuth2 & Refresh Token",
+      "status": "IN_PROGRESS",
+      "dueDate": "2026-05-25"
+    }
+    ```
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Update Successfully",
+      "result": {
+        "id": 12,
+        "title": "Học Spring Security nâng cao",
+        "description": "Hoàn thành nghiên cứu OAuth2 & Refresh Token",
+        "status": "IN_PROGRESS",
+        "dueDate": "2026-05-25",
+        "completedAt": null,
+        "createdAt": "2026-05-22T18:30:00",
+        "updatedAt": "2026-05-22T18:35:10"
+      }
+    }
+    ```
 
-```text
-username: not blank
-password: not blank
-```
+#### 📍 Cập Nhật Nhanh Trạng Thái (Patch Status)
+*   **Endpoint**: `PATCH /api/todos/{id}/status`
+*   **Request Body**:
+    ```json
+    {
+      "status": "DONE"
+    }
+    ```
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Toggle Complete",
+      "result": {
+        "id": 12,
+        "title": "Học Spring Security nâng cao",
+        "description": "Hoàn thành nghiên cứu OAuth2 & Refresh Token",
+        "status": "DONE",
+        "dueDate": "2026-05-25",
+        "completedAt": "2026-05-22T18:40:00",
+        "createdAt": "2026-05-22T18:30:00",
+        "updatedAt": "2026-05-22T18:40:00"
+      }
+    }
+    ```
 
-### TodoCreationRequest
-
-```text
-title: not blank
-priority: not null
-dueDate: future or present
-categoryId: optional
-```
-
-### TodoUpdateRequest
-
-```text
-title: not blank
-status: not null
-priority: not null
-dueDate: future or present
-categoryId: optional
-```
-
-### CategoryCreationRequest
-
-```text
-name: not blank, max 50
-color: optional, must match hex color format if provided
-```
-
----
-
-## 11. Security Requirements
-
-### Public APIs
-
-```http
-POST /auth/register
-POST /auth/login
-GET /swagger-ui/**
-GET /v3/api-docs/**
-```
-
-### Protected APIs
-
-All other APIs require JWT.
-
-### Authorization Rules
-
-```text
-USER:
-- Can manage only their own todos.
-- Can manage only their own categories.
-- Can view their own profile.
-
-ADMIN:
-- Can view all users.
-- Can lock/unlock users.
-- Optional: can view all todos.
-```
-
-### JWT Requirements
-
-JWT should contain:
-
-```text
-subject: username
-role: user role
-issuedAt
-expiration
-```
-
-### Token Expiration
-
-Recommended:
-
-```text
-Access token expiration: 1 hour
-```
-
-Optional advanced:
-
-```text
-Refresh token expiration: 7 days
-```
-
-For MVP, refresh token is optional.
-
----
-
-## 12. Database Requirements
-
-Database name:
-
-```text
-todo_app
-```
-
-Tables:
-
-```text
-users
-todos
-categories
-```
-
-### Suggested users table
-
-```text
-id
-username
-email
-password
-role
-enabled
-created_at
-updated_at
-```
-
-### Suggested todos table
-
-```text
-id
-title
-description
-status
-priority
-due_date
-completed_at
-user_id
-category_id
-created_at
-updated_at
-```
-
-### Suggested categories table
-
-```text
-id
-name
-color
-user_id
-created_at
-updated_at
-```
-
-### Constraints
-
-```text
-users.username unique
-users.email unique
-categories.name unique per user
-todos.user_id references users.id
-todos.category_id references categories.id
-categories.user_id references users.id
-```
+#### ❌ Xóa Todo (Delete Todo)
+*   **Endpoint**: `DELETE /api/todos/{id}`
+*   **Response (200 OK)**:
+    ```json
+    {
+      "code": 1000,
+      "message": "Delete Successfully",
+      "result": null
+    }
+    ```
 
 ---
 
-## 13. Configuration Requirements
+## 🎯 Bảng Ánh Xạ Mã Lỗi Hệ Thống (ErrorCode System)
 
-Use environment variables for sensitive values.
+Khi ứng dụng xảy ra ngoại lệ, hệ thống sẽ trả về mã lỗi đặc trưng trong JSON body thay vì mặc định Spring Boot Trace:
 
-### application.yml example
+| Mã lỗi (code) | Thông điệp lỗi (message) | HTTP Status tương ứng | Mô tả chi tiết |
+| :--- | :--- | :--- | :--- |
+| **1000** | Success | `200 OK` | Yêu cầu được xử lý thành công |
+| **4000** | Invalid request | `400 Bad Request` | Lỗi Validation dữ liệu đầu vào chung |
+| **4001** | User not found | `404 Not Found` | Không tìm thấy thông tin tài khoản |
+| **4002** | Username already exists | `400 Bad Request` | Tên đăng nhập đã bị đăng ký trước đó |
+| **4003** | Email already exists | `400 Bad Request` | Địa chỉ email đã tồn tại trong hệ thống |
+| **4004** | Invalid username or password | `401 Unauthorized` | Tên đăng nhập hoặc mật khẩu không chính xác |
+| **4005** | Unauthorized | `401 Unauthorized` | Người dùng chưa đăng nhập hoặc token không hợp lệ |
+| **4006** | Forbidden | `403 Forbidden` | Người dùng không đủ quyền truy cập tài nguyên |
+| **4007** | Todo not found | `404 Not Found` | Không tìm thấy Todo hoặc không có quyền sở hữu |
+| **4011** | Invalid todo status | `400 Bad Request` | Trạng thái Todo gửi lên không hợp lệ |
+| **4012** | Invalid due date | `400 Bad Request` | Ngày đến hạn công việc không hợp lệ |
+| **4014** | Enum is Wrong | `400 Bad Request` | Parse enum JSON không đúng định dạng (Ví dụ: trạng thái viết sai) |
+| **5000** | Internal server error | `500 Server Error` | Lỗi phát sinh ngoài ý muốn từ phía hệ thống |
+| **7005** | User disabled | `403 Forbidden` | Tài khoản người dùng đã bị khóa hoặc tạm dừng hoạt động |
 
+---
+
+## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy (Getting Started)
+
+### 📋 Yêu Cầu Môi Trường (Prerequisites)
+*   **Java**: JDK 17 hoặc cao hơn (khuyên dùng JDK 21).
+*   **Maven**: Phiên bản 3.8+ dùng để quản lý dependencies và build.
+*   **MySQL Server**: Phiên bản 8.0+.
+
+---
+
+### ⚙️ Hướng Dẫn Từng Bước (Step-by-Step Setup)
+
+#### Bước 1: Khởi Tạo Cơ Sở Dữ Liệu
+Hãy mở MySQL Client hoặc Workbench và thực thi câu lệnh SQL để tạo cơ sở dữ liệu:
+```sql
+CREATE DATABASE todo_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+#### Bước 2: Cấu Hình Hệ Thống
+Chỉnh sửa file cấu hình `src/main/resources/application.yml` để điền chính xác thông tin đăng nhập MySQL của máy bạn:
 ```yaml
-server:
-  port: 8080
-  servlet:
-    context-path: /api
-
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/todo_app}
-    username: ${DBMS_USERNAME:root}
-    password: ${DBMS_PASSWORD:root}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
-jwt:
-  signer-key: ${JWT_SIGNER_KEY:local-secret-key}
-  valid-duration: ${JWT_VALID_DURATION:3600}
+    url: jdbc:mysql://localhost:3306/todo_app?useSSL=false&serverTimezone=UTC
+    username: <YOUR_MYSQL_USERNAME>  # Mặc định là root
+    password: <YOUR_MYSQL_PASSWORD>  # Mặc định là root
 ```
 
-Do not hard-code production secrets.
+#### Bước 3: Biên Dịch Ứng Dụng (Build)
+Mở cửa sổ dòng lệnh (Terminal) tại thư mục gốc dự án và thực hiện biên dịch bằng Maven:
+```bash
+mvn clean install
+```
+> [!NOTE]
+> Dự án sử dụng song song **Lombok** và **MapStruct**, cấu hình biên dịch tự động sinh mã nguồn lớp mapper đã được sắp xếp chính xác trong `pom.xml`. Lệnh build sẽ chạy mượt mà mà không có bất cứ xung đột nào.
 
----
+#### Bước 4: Khởi Chạy Ứng Dụng (Run)
+Sử dụng lệnh Maven để chạy server:
+```bash
+mvn spring-boot:run
+```
+Sau khi server khởi động thành công, logs sẽ thông báo ứng dụng đã lắng nghe tại cổng `8080` với context-path `/api`:
+```text
+[INFO] Tomcat started on port 8080 (http) with context path '/api'
+[INFO] Started ToDoApiApplication in 2.345 seconds
+```
 
-## 14. Docker Requirements
-
-### Dockerfile
-
-The project should include a Dockerfile using multi-stage build.
-
-Required stages:
-
-1. Build stage using Maven + Java 21.
-2. Runtime stage using Java 21 runtime.
-
-Example:
-
-```dockerfile
-FROM maven:3.9.8-amazoncorretto-21 AS build
-
-WORKDIR /app
-
-COPY pom.xml .
-COPY src ./src
-
-RUN mvn package -DskipTests
-
-FROM amazoncorretto:21
-
-WORKDIR /app
-
-COPY --from=build /app/target/*.jar app.jar
-
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+#### Bước 5: Chạy Kiểm Thử Tự Động (Test Suite)
+Dự án đã tích hợp đầy đủ hệ thống unit tests kiểm tra chặt chẽ luồng Auth, User và Todo Services. Bạn có thể chạy toàn bộ testcases thông qua:
+```bash
+mvn clean test
 ```
 
 ---
 
-## 15. Docker Compose Requirements
+## 🧪 Quy Trình Nghiệm Thu & Kiểm Thử Thủ Công
 
-Create `docker-compose.yml` with:
+Bạn có thể dễ dàng kiểm thử các API bằng **Postman** theo các bước khuyến nghị sau để nghiệm thu dự án:
 
-- MySQL service
-- Todo app service
-- Docker network
-- MySQL volume
-- Environment variables
-
-Example:
-
-```yaml
-services:
-  mysql:
-    image: mysql:8.0
-    container_name: todo-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: todo_app
-    ports:
-      - "3306:3306"
-    volumes:
-      - todo_mysql_data:/var/lib/mysql
-    networks:
-      - todo-network
-
-  app:
-    build: .
-    container_name: todo-app-api
-    depends_on:
-      - mysql
-    ports:
-      - "8080:8080"
-    environment:
-      DBMS_CONNECTION: jdbc:mysql://todo-mysql:3306/todo_app
-      DBMS_USERNAME: root
-      DBMS_PASSWORD: root
-      JWT_SIGNER_KEY: change-this-secret-key
-      JWT_VALID_DURATION: 3600
-    networks:
-      - todo-network
-
-volumes:
-  todo_mysql_data:
-
-networks:
-  todo-network:
-```
+1.  **Đăng ký tài khoản (Register)**:
+    *   Gọi `POST http://localhost:8080/api/auth/register` để tạo tài khoản mới.
+2.  **Đăng nhập hệ thống (Login)**:
+    *   Gọi `POST http://localhost:8080/api/auth/login` bằng thông tin vừa tạo.
+    *   **Sao chép (Copy)** chuỗi `token` nhận được trong phần `result.token`.
+3.  **Thiết lập Authorization trong Postman**:
+    *   Chọn tab **Authorization**, chọn Type là **Bearer Token**.
+    *   Dán (Paste) chuỗi token đã sao chép ở bước trước vào.
+4.  **Kiểm tra tính cô lập dữ liệu (Security Check)**:
+    *   Tạo tài khoản thứ 2 và tạo Todo bất kỳ.
+    *   Dùng Token của tài khoản thứ 1 cố tình gửi request `GET /api/todos/{id_todo_cua_tai_khoan_2}` hoặc `DELETE` -> Hệ thống sẽ lập tức chặn lại và trả về mã lỗi `4007 (Todo not found)`. Chứng minh hệ thống phân quyền cực kỳ chặt chẽ và an toàn!
 
 ---
 
-## 16. Testing Requirements
-
-### Unit Tests
-
-Required:
-
-```text
-AuthenticationServiceTest
-UserServiceTest
-TodoServiceTest
-CategoryServiceTest
-```
-
-### Controller Tests
-
-Required:
-
-```text
-AuthControllerTest
-TodoControllerTest
-CategoryControllerTest
-```
-
-### Test Cases
-
-Authentication:
-
-```text
-register valid request success
-register username already exists fail
-register email already exists fail
-login valid credentials success
-login wrong password fail
-```
-
-Todo:
-
-```text
-create todo success
-create todo with empty title fail
-get own todo success
-get other user's todo fail
-update todo success
-delete todo success
-mark todo done should set completedAt
-change done todo to todo should clear completedAt
-```
-
-Category:
-
-```text
-create category success
-create duplicate category name fail
-delete category with todos fail
-```
-
----
-
-## 17. Swagger Requirements
-
-Add Swagger/OpenAPI.
-
-Swagger URL:
-
-```http
-http://localhost:8080/api/swagger-ui/index.html
-```
-
-Swagger should show:
-
-```text
-Auth APIs
-User APIs
-Todo APIs
-Category APIs
-```
-
----
-
-## 18. README Requirements
-
-README must include:
-
-```text
-1. Project name
-2. Description
-3. Tech stack
-4. Features
-5. API endpoints
-6. Database schema
-7. Environment variables
-8. How to run locally
-9. How to run with Docker Compose
-10. How to test APIs
-11. Screenshots of Swagger or Postman
-```
-
----
-
-## 19. Development Roadmap
-
-### Phase 1: Project Setup
-
-Tasks:
-
-```text
-Create Spring Boot project
-Add dependencies
-Setup MySQL connection
-Create common ApiResponse
-Create GlobalExceptionHandler
-Create ErrorCode enum
-```
-
-Done when:
-
-```text
-Application starts successfully
-Database connects successfully
-Health check API works
-```
-
----
-
-### Phase 2: User and Auth
-
-Tasks:
-
-```text
-Create User entity
-Create UserRepository
-Create Register API
-Create Login API
-Add PasswordEncoder
-Add JWT generation
-Add Spring Security config
-Add get current user API
-```
-
-Done when:
-
-```text
-User can register
-User can login
-Protected APIs require token
-GET /users/me works with token
-```
-
----
-
-### Phase 3: Todo CRUD
-
-Tasks:
-
-```text
-Create Todo entity
-Create TodoRepository
-Create TodoService
-Create TodoController
-Create create todo API
-Create get todo list API
-Create get todo detail API
-Create update todo API
-Create delete todo API
-Create update status API
-```
-
-Done when:
-
-```text
-User can manage their own todos
-User cannot access other user's todos
-```
-
----
-
-### Phase 4: Category CRUD
-
-Tasks:
-
-```text
-Create Category entity
-Create CategoryRepository
-Create CategoryService
-Create CategoryController
-Connect todo with category
-Prevent duplicate category name per user
-Prevent deleting category if it has todos
-```
-
-Done when:
-
-```text
-User can manage categories
-Todo can belong to a category
-Category rules work correctly
-```
-
----
-
-### Phase 5: Filter, Search, Pagination
-
-Tasks:
-
-```text
-Filter todo by status
-Filter todo by priority
-Filter todo by category
-Search todo by keyword
-Add pagination
-Add sorting
-```
-
-Done when:
-
-```text
-GET /todos supports query parameters
-```
-
----
-
-### Phase 6: Docker
-
-Tasks:
-
-```text
-Create Dockerfile
-Build Docker image
-Create docker-compose.yml
-Run app + MySQL with Docker Compose
-```
-
-Done when:
-
-```text
-docker compose up -d works
-API can connect to MySQL container
-```
-
----
-
-### Phase 7: Testing
-
-Tasks:
-
-```text
-Write service tests
-Write controller tests
-Test exception cases
-```
-
-Done when:
-
-```text
-Core features have passing tests
-```
-
----
-
-### Phase 8: Documentation
-
-Tasks:
-
-```text
-Add Swagger
-Write README
-Add Postman collection
-Add sample screenshots
-```
-
-Done when:
-
-```text
-Another developer can clone and run the project using README
-```
-
----
-
-## 20. Definition of Done
-
-The project is considered complete when:
-
-```text
-User can register and login.
-JWT security works.
-User can create, update, delete, and list their own todos.
-User can create, update, delete, and list their own categories.
-Todo can be filtered, searched, sorted, and paginated.
-Validation works.
-Global exception handling works.
-MySQL stores data correctly.
-Docker Compose can run app and MySQL.
-Swagger documentation is available.
-README is clear.
-Basic tests are written.
-```
-
----
-
-## 21. Optional Advanced Features
-
-After finishing the main requirements, you may add:
-
-```text
-Refresh token
-Email verification
-Forgot password
-Todo reminder
-Soft delete
-Audit log
-Admin dashboard APIs
-Role and permission tables
-Flyway migration
-Redis cache
-CI/CD with GitHub Actions
-Deploy to VPS or cloud
-```
-
-Do not start optional features before completing the core project.
-todo-app-api
-├── pom.xml
-├── README.md
-├── .gitignore
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com
-│   │   │       └── nhan
-│   │   │           └── todoapp
-│   │   │               ├── TodoAppApplication.java
-│   │   │               │
-│   │   │               ├── configuration
-│   │   │               │   ├── SecurityConfig.java
-│   │   │               │   ├── OpenApiConfig.java
-│   │   │               │   └── ApplicationInitConfig.java
-│   │   │               │
-│   │   │               ├── controller
-│   │   │               │   ├── AuthController.java
-│   │   │               │   ├── UserController.java
-│   │   │               │   ├── TodoController.java
-│   │   │               │   └── CategoryController.java
-│   │   │               │
-│   │   │               ├── service
-│   │   │               │   ├── AuthenticationService.java
-│   │   │               │   ├── UserService.java
-│   │   │               │   ├── TodoService.java
-│   │   │               │   └── CategoryService.java
-│   │   │               │
-│   │   │               ├── repository
-│   │   │               │   ├── UserRepository.java
-│   │   │               │   ├── TodoRepository.java
-│   │   │               │   └── CategoryRepository.java
-│   │   │               │
-│   │   │               ├── entity
-│   │   │               │   ├── User.java
-│   │   │               │   ├── Todo.javav
-│   │   │               │   └── Category.java
-│   │   │               │
-│   │   │               ├── dto
-│   │   │               │   ├── request
-│   │   │               │   │   ├── RegisterRequest.java
-│   │   │               │   │   ├── AuthenticationRequest.java
-│   │   │               │   │   ├── ChangePasswordRequest.java
-│   │   │               │   │   ├── TodoCreationRequest.java
-│   │   │               │   │   ├── TodoUpdateRequest.java
-│   │   │               │   │   ├── TodoStatusUpdateRequest.java
-│   │   │               │   │   ├── CategoryCreationRequest.java
-│   │   │               │   │   └── CategoryUpdateRequest.java
-│   │   │               │   │
-│   │   │               │   └── response
-│   │   │               │       ├── ApiResponse.java
-│   │   │               │       ├── AuthenticationResponse.java
-│   │   │               │       ├── UserResponse.java
-│   │   │               │       ├── TodoResponse.java
-│   │   │               │       └── CategoryResponse.java
-│   │   │               │
-│   │   │               ├── mapper
-│   │   │               │   ├── UserMapper.java
-│   │   │               │   ├── TodoMapper.java
-│   │   │               │   └── CategoryMapper.java
-│   │   │               │
-│   │   │               ├── enums
-│   │   │               │   ├── Role.java
-│   │   │               │   ├── TodoStatus.java
-│   │   │               │   └── Priority.java
-│   │   │               │
-│   │   │               ├── exception
-│   │   │               │   ├── AppException.java
-│   │   │               │   ├── ErrorCode.java
-│   │   │               │   └── GlobalExceptionHandler.java
-│   │   │               │
-│   │   │               ├── security
-│   │   │               │   ├── JwtTokenProvider.java
-│   │   │               │   ├── JwtAuthenticationFilter.java
-│   │   │               │   └── CustomUserDetailsService.java
-│   │   │               │
-│   │   │               └── util
-│   │   │                   └── DateTimeUtil.java
-│   │   │
-│   │   └── resources
-│   │       ├── application.yml
-│   │       ├── application-dev.yml
-│   │       └── application-test.yml
-│   │
-│   └── test
-│       └── java
-│           └── com
-│               └── nhan
-│                   └── todoapp
-│                       ├── TodoAppApplicationTests.java
-│                       │
-│                       ├── service
-│                       │   ├── AuthenticationServiceTest.java
-│                       │   ├── UserServiceTest.java
-│                       │   ├── TodoServiceTest.java
-│                       │   └── CategoryServiceTest.java
-│                       │
-│                       └── controller
-│                           ├── AuthControllerTest.java
-│                           ├── TodoControllerTest.java
-│                           └── CategoryControllerTest.java
-
----
-
-## 16. API Contract (Dành riêng cho Frontend)
-
-Phần này cung cấp chính xác các mẫu JSON (Payload) để team Frontend có thể dựa vào và làm việc độc lập. 
-Tất cả các API đều được bọc trong một chuẩn `ApiResponse` thống nhất.
-
-### 16.1. Đăng ký (Register)
-- **Endpoint:** `POST /api/auth/register` (hoặc `/auth/register`)
-- **Headers:** None
-- **Request Body:**
-```json
-{
-  "username": "nhan",
-  "email": "nhan@example.com",
-  "password": "password123"
-}
-```
-- **Response (200 OK):**
-```json
-{
-  "code": 1000,
-  "message": "Register successfully!",
-  "result": {
-    "id": 1,
-    "username": "nhan",
-    "email": "nhan@example.com",
-    "role": "USER",
-    "enabled": true,
-    "createdAt": "2026-05-20T10:00:00",
-    "updatedAt": "2026-05-20T10:00:00"
-  }
-}
-```
-
-### 16.2. Đăng nhập (Login)
-- **Endpoint:** `POST /api/auth/login` (hoặc `/auth/login`)
-- **Headers:** None
-- **Request Body:**
-```json
-{
-  "username": "nhan",
-  "password": "password123"
-}
-```
-- **Response (200 OK):**
-```json
-{
-  "code": 1000,
-  "message": "Login successfully!",
-  "result": {
-    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0Ijoib...",
-    "authenticated": true
-  }
-}
-```
-
-### 16.3. Tạo công việc mới (Create Todo)
-- **Endpoint:** `POST /api/todos` (hoặc `/todos`)
-- **Headers:** `Authorization: Bearer <token>`
-- **Request Body:**
-```json
-{
-  "title": "Học ReactJS",
-  "description": "Làm UI cho Todo App",
-  "priority": "HIGH",
-  "dueDate": "2026-06-01",
-  "categoryId": 1
-}
-```
-- **Response (200 OK):**
-```json
-{
-  "code": 1000,
-  "message": "Create Successfully",
-  "result": {
-    "id": 1,
-    "title": "Học ReactJS",
-    "description": "Làm UI cho Todo App",
-    "status": "TODO",
-    "priority": "HIGH",
-    "dueDate": "2026-06-01",
-    "completedAt": null,
-    "createdAt": "2026-05-20T10:30:00",
-    "updatedAt": "2026-05-20T10:30:00",
-    "category": null
-  }
-}
-```
-
-### 16.4. Lấy danh sách việc của tôi (Get My Todos)
-- **Endpoint:** `GET /api/todos` (hoặc `/todos`)
-- **Headers:** `Authorization: Bearer <token>`
-- **Response (200 OK):**
-```json
-{
-  "code": 1000,
-  "message": "Get Successfully",
-  "result": [
-    {
-      "id": 1,
-      "title": "Học ReactJS",
-      "description": "Làm UI cho Todo App",
-      "status": "TODO",
-      "priority": "HIGH",
-      "dueDate": "2026-06-01",
-      "completedAt": null,
-      "createdAt": "2026-05-20T10:30:00",
-      "updatedAt": "2026-05-20T10:30:00",
-      "category": null
-    }
-  ]
-}
-```
-
-### 16.5. Đổi trạng thái việc (Update Status)
-- **Endpoint:** `PATCH /api/todos/{id}/status` (hoặc `/todos/{id}/status`)
-- **Headers:** `Authorization: Bearer <token>`
-- **Request Body:**
-```json
-{
-  "status": "DONE"
-}
-```
-- **Response (200 OK):**
-```json
-{
-  "code": 1000,
-  "message": "Toggle Complete",
-  "result": {
-    "id": 1,
-    "title": "Học ReactJS",
-    "description": "Làm UI cho Todo App",
-    "status": "DONE",
-    "priority": "HIGH",
-    "dueDate": "2026-06-01",
-    "completedAt": "2026-05-20T11:00:00",
-    "createdAt": "2026-05-20T10:30:00",
-    "updatedAt": "2026-05-20T11:00:00",
-    "category": null
-  }
-}
-```
+Chúc bạn có trải nghiệm tuyệt vời cùng với **Spring Boot Todo API**! Mọi ý kiến phản hồi hoặc đóng góp phát triển vui lòng tạo Issue trên Repository. 🚀

@@ -12,12 +12,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequest {
     @NotBlank
-    @Size(min = 1, max = 50)
+    @Size(min = 4, max = 50)
     String username;
     @Size(min = 6 )
     @NotBlank
     @Email
     String email;
     @NotBlank
+    @Size(min = 6 , message = "Password must be at least 6 characters")
     String password;
 }

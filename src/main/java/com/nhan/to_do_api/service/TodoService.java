@@ -67,6 +67,7 @@ public class TodoService {
         todo.setDescription(request.getDescription());
         todo.setStatus(request.getStatus());
         todo.setUpdatedAt(LocalDateTime.now());
+        todo.setDueDate(request.getDueDate());
 
         return todoMapper.toToDoResponse(todoRepository.save(todo));
     }

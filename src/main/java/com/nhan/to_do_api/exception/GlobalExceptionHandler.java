@@ -3,6 +3,7 @@ package com.nhan.to_do_api.exception;
 import com.nhan.to_do_api.dto.response.ApiResponse;
 import jakarta.validation.ValidationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -65,12 +66,22 @@ public class GlobalExceptionHandler {
    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleException(MethodArgumentNotValidException exception) {
        ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
-       ApiResponse apiresponse = ApiResponse.builder()
+       ApiResponse apiResponse = ApiResponse.builder()
                .code(errorCode.getCode())
                .message(errorCode.getMessage())
                .result(null)
                .build();
-       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiresponse);
+       return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
    }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(HttpMessageNotReadableException exception) {
+        ErrorCode errorCode = ErrorCode.HTTP_MESSAGE_NOT_READABLE_EXCEPTION;
+        ApiResponse apiResponse = ApiResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .result(null)
+               .build();
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
+    }
 }

@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class TodoCreationRequest {
     @NotBlank(message = "Title is required")
-    @Size(min = 3, max = 100 , message = "Title mus be 3-100 characters")
+    @Size(min = 4, max = 100 , message = "Title must be 4-100 characters")
     String title;
     String description;
     TodoStatus status;

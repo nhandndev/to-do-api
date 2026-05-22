@@ -34,7 +34,7 @@ public class TodoController {
                 .build();
     }
     @GetMapping("/{id}")
-    public ApiResponse<TodoResponse> getToDo (@PathVariable @Valid Long id){
+    public ApiResponse<TodoResponse> getToDo (@PathVariable  Long id){
         return ApiResponse.<TodoResponse>builder()
                 .code(1000)
                 .message("Get Successfully")

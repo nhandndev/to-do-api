@@ -60,10 +60,10 @@ public class AuthenticationService {
        var user = userRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD));
        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
        if(!authenticated) {
-           throw new AppException(ErrorCode.USER_DISABLED);
+           throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
        }
        if(!user.getEnabled()) {
-           throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
+           throw new AppException(ErrorCode.USER_DISABLED);
        }
        String token = generateToken(user);
        return AuthenticationResponse.builder()
