@@ -4,11 +4,13 @@ import com.nhan.to_do_api.dto.request.AuthenticationRequest;
 import com.nhan.to_do_api.dto.request.RegisterRequest;
 import com.nhan.to_do_api.dto.response.AuthenticationResponse;
 import com.nhan.to_do_api.dto.response.UserResponse;
+import com.nhan.to_do_api.entity.InvalidToken;
 import com.nhan.to_do_api.entity.User;
 import com.nhan.to_do_api.enums.Role;
 import com.nhan.to_do_api.exception.AppException;
 import com.nhan.to_do_api.exception.ErrorCode;
 import com.nhan.to_do_api.mapper.UserMapper;
+import com.nhan.to_do_api.repository.InvalidTokenRepository;
 import com.nhan.to_do_api.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -36,6 +38,8 @@ public class AuthenticationService {
     private String SIGN_KEY;
    @Autowired
    private UserRepository userRepository;
+   @Autowired
+   private InvalidTokenRepository invalidTokenRepository;
    @Autowired
    private PasswordEncoder passwordEncoder;
    @Autowired
@@ -115,9 +119,9 @@ public class AuthenticationService {
         if (!(verified && ExpirationDate.after(new Date()))) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-//        if (invalidatedTokenRepository.findById(signedJWT.getJWTClaimsSet().getJWTID()).isPresent()) {
-//            throw new AppException(ErrorCode.UNAUTHORIZED);
-//        }
+        if (invalidTokenRepository.existsById(token)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         return signedJWT;
     }
 //    public AuthenticationResponse refreshToken(RefreshRequest request) throws JOSEException, ParseException {
@@ -133,4 +137,37 @@ public class AuthenticationService {
 //        return AuthenticationResponse.builder().token(token).authenticated(true).build();
 //
 //    }
+    public void logout(String authorizationHeader) {
+       String token = extractTokenFromHeader(authorizationHeader);
+       if(invalidTokenRepository.existsById(token)){
+           return;
+       }
+           Instant expiredTime = extractExpirationFromToken(token);
+        InvalidToken invalidToken = InvalidToken.builder()
+                .token(token)
+                .expiredTime(expiredTime)
+                .build();
+        invalidTokenRepository.save(invalidToken);
+    }
+    private String extractTokenFromHeader(String authorizationHeader){
+       if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")){
+           throw new AppException(ErrorCode.INVALID_AUTHORIZATION_HEADER);
+       }
+       return authorizationHeader.substring(7);
+    }
+    private Instant extractExpirationFromToken(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            Date expiredTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+            if (expiredTime == null) {
+                throw new AppException(ErrorCode.INVALID_AUTHORIZATION_HEADER);
+            }
+
+            return expiredTime.toInstant();
+        } catch (ParseException e) {
+            throw new AppException(ErrorCode.INVALID_AUTHORIZATION_HEADER);
+        }
+
+    }
 }

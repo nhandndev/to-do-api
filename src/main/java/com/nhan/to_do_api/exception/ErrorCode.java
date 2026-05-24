@@ -33,7 +33,9 @@ public enum ErrorCode {
     HTTP_MESSAGE_NOT_READABLE_EXCEPTION(4014,"Enum is Wrong " , HttpStatus.BAD_REQUEST),
 
     INTERNAL_SERVER_ERROR(5000, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
-    TOKEN_CANNOT_CREATE(5001,"Toekn Cannot Create",HttpStatus.INTERNAL_SERVER_ERROR),;
+    TOKEN_CANNOT_CREATE(5001,"Toekn Cannot Create",HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_AUTHORIZATION_HEADER(401,"AuthorizationHeader Is Invalid",HttpStatus.INTERNAL_SERVER_ERROR)
+    ;
      String message;
      int code;
      HttpStatus httpStatus;

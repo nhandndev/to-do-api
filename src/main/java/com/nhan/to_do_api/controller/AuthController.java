@@ -9,10 +9,7 @@ import com.nhan.to_do_api.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,6 +31,15 @@ public class AuthController {
                 .code(1000)
                 .message("Login successfully!")
                 .result(authenticationService.login(authenticationRequest))
+                .build();
+    }
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@RequestHeader("Authorization") String authorizationHeader){
+        authenticationService.logout(authorizationHeader);
+        return ApiResponse.<Void>builder()
+                .code(1000)
+                .message("Logout succcessful")
+                .result(null)
                 .build();
     }
 }
