@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class RefreshToken {
    @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;
    private String token;
    private Boolean revoked;

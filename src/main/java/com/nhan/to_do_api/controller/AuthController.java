@@ -1,6 +1,7 @@
 package com.nhan.to_do_api.controller;
 
 import com.nhan.to_do_api.dto.request.AuthenticationRequest;
+import com.nhan.to_do_api.dto.request.LogoutRequest;
 import com.nhan.to_do_api.dto.request.RefreshTokenRequest;
 import com.nhan.to_do_api.dto.request.RegisterRequest;
 import com.nhan.to_do_api.dto.response.ApiResponse;
@@ -36,8 +37,8 @@ public class AuthController {
                 .build();
     }
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(@RequestHeader("Authorization") String authorizationHeader){
-        authenticationService.logout(authorizationHeader);
+    public ApiResponse<Void> logout(@RequestBody LogoutRequest request){
+        authenticationService.logout(request);
         return ApiResponse.<Void>builder()
                 .code(1000)
                 .message("Logout succcessful")

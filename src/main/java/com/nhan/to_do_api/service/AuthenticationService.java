@@ -2,6 +2,7 @@ package com.nhan.to_do_api.service;
 
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.nhan.to_do_api.dto.request.AuthenticationRequest;
+import com.nhan.to_do_api.dto.request.LogoutRequest;
 import com.nhan.to_do_api.dto.request.RefreshTokenRequest;
 import com.nhan.to_do_api.dto.request.RegisterRequest;
 import com.nhan.to_do_api.dto.response.AuthenticationResponse;
@@ -192,17 +193,18 @@ public class AuthenticationService {
 //        return AuthenticationResponse.builder().token(token).authenticated(true).build();
 //
 //    }
-    public void logout(String authorizationHeader) {
-       String token = extractTokenFromHeader(authorizationHeader);
-       if(invalidTokenRepository.existsById(token)){
-           return;
-       }
-           Instant expiredTime = extractExpirationFromToken(token);
-        InvalidToken invalidToken = InvalidToken.builder()
-                .token(token)
-                .expiredTime(expiredTime)
-                .build();
-        invalidTokenRepository.save(invalidToken);
+    public void logout(LogoutRequest request) {
+        if (request.getRefreshToken() == null || request.getRefreshToken().isEmpty()) {
+            return;
+        }
+        
+        var optionalToken = refreshTokenRepository.findByToken(request.getRefreshToken());
+        if (optionalToken.isPresent()) {
+            RefreshToken refreshToken = optionalToken.get();
+            refreshToken.setRevoked(true);
+            refreshToken.setUpdatedAt(LocalDateTime.now());
+            refreshTokenRepository.save(refreshToken);
+        }
     }
     private String extractTokenFromHeader(String authorizationHeader){
        if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")){
