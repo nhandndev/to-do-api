@@ -1,16 +1,21 @@
 package com.nhan.to_do_api.service;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import com.nhan.to_do_api.dto.request.AuthenticationRequest;
+import com.nhan.to_do_api.dto.request.RefreshTokenRequest;
 import com.nhan.to_do_api.dto.request.RegisterRequest;
 import com.nhan.to_do_api.dto.response.AuthenticationResponse;
+import com.nhan.to_do_api.dto.response.RefreshTokenResponse;
 import com.nhan.to_do_api.dto.response.UserResponse;
 import com.nhan.to_do_api.entity.InvalidToken;
+import com.nhan.to_do_api.entity.RefreshToken;
 import com.nhan.to_do_api.entity.User;
 import com.nhan.to_do_api.enums.Role;
 import com.nhan.to_do_api.exception.AppException;
 import com.nhan.to_do_api.exception.ErrorCode;
 import com.nhan.to_do_api.mapper.UserMapper;
 import com.nhan.to_do_api.repository.InvalidTokenRepository;
+import com.nhan.to_do_api.repository.RefreshTokenRepository;
 import com.nhan.to_do_api.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -41,6 +46,8 @@ public class AuthenticationService {
    @Autowired
    private InvalidTokenRepository invalidTokenRepository;
    @Autowired
+   private RefreshTokenRepository refreshTokenRepository;
+   @Autowired
    private PasswordEncoder passwordEncoder;
    @Autowired
    private UserMapper userMapper;
@@ -69,29 +76,77 @@ public class AuthenticationService {
        if(!user.getEnabled()) {
            throw new AppException(ErrorCode.USER_DISABLED);
        }
-       String token = generateToken(user);
+       String accessToken = generateAccessToken(user);
+       String refreshToken = createRefreshToken(user).getToken();
        return AuthenticationResponse.builder()
-               .authenticated(true)
-               .token(token)
+               .accessToken(accessToken)
+               .refreshToken(refreshToken)
                .build();
 
 
    }
-    public String generateToken(User user) {
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).type(JOSEObjectType.JWT).build();
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().subject(user.getUsername()).issuer("DoanNgocNhan")
+    public String generateAccessToken(User user) {
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
+                .type(JOSEObjectType.JWT)
+                .build();
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                .issuer("DoanNgocNhan")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(3600, ChronoUnit.SECONDS).toEpochMilli()))
                 .build();
-//                .jwtID(UUID.randomUUID().toString()).claim("scope", buildScope(user)).build();
+
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
+
         try {
             jwsObject.sign(new MACSigner(SIGN_KEY));
         } catch (JOSEException e) {
             throw new AppException(ErrorCode.TOKEN_CANNOT_CREATE);
         }
         return jwsObject.serialize();
+    }
+    private RefreshToken createRefreshToken(User user) {
+        RefreshToken refreshToken = RefreshToken.builder()
+                .token(UUID.randomUUID().toString())
+                .user(user)
+                .revoked(false)
+                .createAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .expiryAt(LocalDateTime.now().plus(7, ChronoUnit.DAYS))
+                .build();
+
+        return refreshTokenRepository.save(refreshToken);
+    }
+    public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
+        RefreshToken oldRefreshToken = refreshTokenRepository.findByToken(request.getRefreshToken())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
+
+        if (oldRefreshToken.getRevoked()) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_REVOKED);
+        }
+
+        if (oldRefreshToken.getExpiryAt().isBefore(LocalDateTime.now())) {
+            oldRefreshToken.setRevoked(true);
+            oldRefreshToken.setUpdatedAt(LocalDateTime.now());
+            refreshTokenRepository.save(oldRefreshToken);
+
+            throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        User user = oldRefreshToken.getUser();
+
+        oldRefreshToken.setRevoked(true);
+        oldRefreshToken.setUpdatedAt(LocalDateTime.now());
+        refreshTokenRepository.save(oldRefreshToken);
+
+        String newAccessToken = generateAccessToken(user);
+        RefreshToken newRefreshToken = createRefreshToken(user);
+
+        return AuthenticationResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken.getToken())
+                .build();
     }
 //    private String buildScope(User user) {
 //        StringJoiner stringJoiner = new StringJoiner(" ");
@@ -168,6 +223,5 @@ public class AuthenticationService {
         } catch (ParseException e) {
             throw new AppException(ErrorCode.INVALID_AUTHORIZATION_HEADER);
         }
-
     }
 }

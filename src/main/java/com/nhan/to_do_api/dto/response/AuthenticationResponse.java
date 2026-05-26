@@ -1,14 +1,15 @@
 package com.nhan.to_do_api.dto.response;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class AuthenticationResponse {
-    String token;
-    boolean authenticated;
+    private String refreshToken;
+    private String accessToken;
+
 }

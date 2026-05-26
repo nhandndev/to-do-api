@@ -31,10 +31,15 @@ public enum ErrorCode {
     OLD_PASSWORD_INCORRECT(4013, "Old password is incorrect", HttpStatus.BAD_REQUEST),
     //ENUM
     HTTP_MESSAGE_NOT_READABLE_EXCEPTION(4014,"Enum is Wrong " , HttpStatus.BAD_REQUEST),
-
     INTERNAL_SERVER_ERROR(5000, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     TOKEN_CANNOT_CREATE(5001,"Toekn Cannot Create",HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_AUTHORIZATION_HEADER(401,"AuthorizationHeader Is Invalid",HttpStatus.INTERNAL_SERVER_ERROR)
+    INVALID_AUTHORIZATION_HEADER(401,"AuthorizationHeader Is Invalid",HttpStatus.INTERNAL_SERVER_ERROR),
+
+    //TOKEN
+    INVALID_TOKEN(1006,"Token is Invalid ",HttpStatus.UNAUTHORIZED),
+    ACCESS_TOKEN_EXPIRED(1007,"Access Token is Expired",HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_EXPIRED(1007,"Refresh Token is Expired ",HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_REVOKED(1008,"Refresh Token is Revoked",HttpStatus.UNAUTHORIZED)
     ;
      String message;
      int code;

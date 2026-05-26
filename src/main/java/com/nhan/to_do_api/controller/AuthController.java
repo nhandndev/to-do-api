@@ -1,10 +1,12 @@
 package com.nhan.to_do_api.controller;
 
 import com.nhan.to_do_api.dto.request.AuthenticationRequest;
+import com.nhan.to_do_api.dto.request.RefreshTokenRequest;
 import com.nhan.to_do_api.dto.request.RegisterRequest;
 import com.nhan.to_do_api.dto.response.ApiResponse;
 import com.nhan.to_do_api.dto.response.AuthenticationResponse;
 import com.nhan.to_do_api.dto.response.UserResponse;
+import com.nhan.to_do_api.entity.RefreshToken;
 import com.nhan.to_do_api.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,4 +44,13 @@ public class AuthController {
                 .result(null)
                 .build();
     }
+    @PostMapping("/refresh-token")
+    public ApiResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest){
+        return  ApiResponse.<AuthenticationResponse>builder()
+                .code(1000)
+                .message("refresh-token successfull")
+                .result(authenticationService.refreshToken(refreshTokenRequest))
+                .build();
+    }
+
 }

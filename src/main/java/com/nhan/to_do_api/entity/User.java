@@ -55,4 +55,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Todo> todos;
+
+    @OneToMany(mappedBy = "user")
+    private List<RefreshToken> refreshTokens;
 }

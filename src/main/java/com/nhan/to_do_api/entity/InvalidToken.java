@@ -19,7 +19,7 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvalidToken {
     @Id
-    @Column(length = 1000)
+    @Column(length = 255)
     private String token;
 
     @Column(nullable = false)
